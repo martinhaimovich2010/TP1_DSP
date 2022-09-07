@@ -59,3 +59,5 @@ def desvio_estandar(medio, valores):
     for i in valores:
         sumatoria += (i - medio)**2
     return (sumatoria/(len(valores)-1))**0.5
+
+    ## PUEDO EDITAR?
