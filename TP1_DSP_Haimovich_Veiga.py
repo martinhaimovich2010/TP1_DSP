@@ -1,6 +1,7 @@
+#%%
 #Ejercicio 1
 #Importo bibliotecas
-import sounddevice as sd
+# import sounddevice as sd
 import numpy as np
 import matplotlib.pyplot as plt
 # Defino los parametros de frecuencia, frecuencia de muestreo, numero de armonicos, etc
@@ -17,8 +18,9 @@ for k in range(1,K+1):
     ck = ((-1)**k)/(k*np.pi)
     A += (1/k) * ck * np.sin(2*n*k*np.pi*(f0/fs))
 
-
 #Normalizo la señal completa
+Amax = np.amax(A)
+A = A * (1/Amax)
 
 # Genero el vector tiempo de 2 segundos
 t=np.linspace(0,2,N)
@@ -27,10 +29,11 @@ t=np.linspace(0,2,N)
 plt.figure(1)
 plt.plot(t,A)
 plt.grid()
-plt.xlabel("Tiempo")
-plt.ylabel("Amplitud")
+plt.xlim(0,(16/f0))
+plt.title('Señal LA 440')
+plt.xlabel("Tiempo [s]")
+plt.ylabel("Amplitud Normalizada")
 plt.show()
-
 
 #%%
 
@@ -59,5 +62,4 @@ def desvio_estandar(medio, valores):
     for i in valores:
         sumatoria += (i - medio)**2
     return (sumatoria/(len(valores)-1))**0.5
-
-    ## PUEDO EDITAR?
+# %%
