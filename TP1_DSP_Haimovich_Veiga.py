@@ -204,8 +204,65 @@ print(SNR1)
 print(SNR2)
 print(SNR3)
 
+# FALTA: Presentar resultados en tabla y analizar que pasa si agrego una componente de DC
 
 # %%
 
 # Ejercicio 4
 
+def promedio_ensamble(N):
+    # Inicializo Array
+    randNoiseSignals = []    
+
+    # Creo las señales y las guardo en el array
+    for i in range(N):
+        A_randNoise = A + np.random.normal(0, 3, len(t))
+        randNoiseSignals.append(A_randNoise)
+
+    # Inicializo un nuevo array que será el promedio, y transpongo el array de señales con ruido para poder sumar los valores para el promedio
+    averageA_RN = []
+    randNoiseSignals_T = np.array(randNoiseSignals).transpose()
+    for i in range(len(randNoiseSignals[0])):
+        averageA_RN.append((1/10) * np.sum(randNoiseSignals_T[i]))
+
+    # Normalizo
+    Amax = np.amax(averageA_RN)
+    averageA_RN = averageA_RN / Amax
+
+    SNR_average = Señal_Ruido(averageA_RN,3,fs/f0)
+
+    return randNoiseSignals, averageA_RN, SNR_average
+
+randNoiseSignals10, averageA_RN10, SNR_average10 = promedio_ensamble(10)
+randNoiseSignals100, averageA_RN100, SNR_average100 = promedio_ensamble(100)
+randNoiseSignals1000, averageA_RN1000, SNR_average1000 = promedio_ensamble(1000)
+
+print(SNR_average10)
+print(SNR_average100)
+print(SNR_average1000)
+
+plt.figure(figsize=(25,15))
+plt.subplot(2,2,1)
+plt.plot(t, averageA_RN10)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
+plt.xlim(0, 16/f0)
+
+
+plt.subplot(2,2,2)
+plt.plot(t, averageA_RN100)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
+plt.xlim(0, 16/f0)
+
+
+plt.subplot(2,2,3)
+plt.plot(t, averageA_RN1000)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
+plt.xlim(0, 16/f0)
+plt.show()
+
+# FALTA: Presentar datos en tabla y chequear si el SNR está bien calculado (Ej. 3)
+
+# %%
