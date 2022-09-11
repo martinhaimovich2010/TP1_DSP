@@ -182,18 +182,18 @@ plt.show()
 #Defino formula que calcula relacion señal ruido
 def Señal_Ruido(A,sigma,f_A):
     SNR = np.amax(A)/sigma
-    if SNR > 3:
+    # if SNR > 3:
         # return "La relacion señal ruido es ", SNR
-        return SNR
-    else:
-        signallessNoise = []
-        for i in A:
-            j=f_A
-            if ((j % f_A) == 0):
-                signallessNoise.append(i)
-            j=j+1
-        noisySNR, error = desvio_estandar(valor_medio(signallessNoise), signallessNoise)
-        return noisySNR
+    return SNR
+    # else:
+    #     signallessNoise = []
+    #     for i in A:
+    #         j=f_A
+    #         if ((j % f_A) == 0):
+    #             signallessNoise.append(i)
+    #         j=j+1
+    #     noisySNR, error = desvio_estandar(valor_medio(signallessNoise), signallessNoise)
+    #     return noisySNR
 
 
 SNR1 = Señal_Ruido(AX1,sigma1,fs/f0)
@@ -225,11 +225,12 @@ def promedio_ensamble(N):
     for i in range(len(randNoiseSignals[0])):
         averageA_RN.append((1/10) * np.sum(randNoiseSignals_T[i]))
 
+    # Mido SNR
+    SNR_average = Señal_Ruido(averageA_RN,3,fs/f0)
+
     # Normalizo
     Amax = np.amax(averageA_RN)
     averageA_RN = averageA_RN / Amax
-
-    SNR_average = Señal_Ruido(averageA_RN,3,fs/f0)
 
     return randNoiseSignals, averageA_RN, SNR_average
 
