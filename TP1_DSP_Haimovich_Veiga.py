@@ -19,76 +19,116 @@ t=np.linspace(0,2,N)
 A = np.zeros(N)
 
 #Voy agregandole elementos al vector A (armonicos) y grafico cada armonico
+plt.figure(figsize=(25,15))
 for k in range(1,K+1):
     ck = ((-1)**k)/(k*np.pi)
-    A += (1/k) * ck * np.sin(2*n*k*np.pi*(f0/fs))
+    ck_signal = (1/k) * ck * np.sin(2*n*k*np.pi*(f0/fs))
+    A += ck_signal
     plt.subplot(3,3,k)
-    plt.plot(t,A)
+    plt.plot(t,ck_signal)
     plt.grid()
-    plt.xlim(0,(16/f0))
-    plt.title(("Señal LA 440 con ",k, "armonicos"))
-    #plt.xlabel("Tiempo [s]")
-    plt.ylabel("Amplitud")
-    plt.show()
+    plt.xlim(0,(8/f0))
+    plt.title('Señal LA 440 con %i armonicos' %k)
+    plt.xlabel("Tiempo [s]")
+    plt.ylabel("Amplitud")   
 
 #Normalizo la señal completa
 Amax = np.amax(A)
 A = A * (1/Amax)
 
 #Grafico la señal completa
-plt.figure(2)
+plt.subplot(3,3,6)
 plt.plot(t,A)
 plt.grid()
-plt.xlim(0,(16/f0))
-plt.title('Señal LA 440')
+plt.xlim(0,(8/f0))
+plt.title('Señal LA 440 + Armónicos')
 plt.xlabel("Tiempo [s]")
 plt.ylabel("Amplitud Normalizada")
 plt.show()
 
 #Grafico cada armónico por separado
+#plt.figure(figsize=(25,15))
 #for k in range(1,K+1):
     #plt.subplot(3,3,k)
     #plt.plot(t,A)
     #plt.grid()
-    #plt.xlim(0,(16/f0))
+    #plt.xlim(0,(1/f0))
     #plt.title(("Señal LA 440 con ",k, "armonicos"))
     #plt.xlabel("Tiempo [s]")
     #plt.ylabel("Amplitud Normalizada")
-    #plt.
-    #plt.show()
+#plt.show()
 
 #%%
 
 #Ejercicio 2
 
 import random
-#Defino una señal aleatoria de longitud L
-L = int(input("Introducir longitud de la señal aleatoria: "))
-valores = []
+# Defino una señal aleatoria de longitud L
+# L = int(input("Introducir longitud de la señal aleatoria: "))
+# valores = []
+
+# Defino los parámetros
 mu = 0
 sigma = 1
 
 
-for i in range(L):
-    temp = random.gauss(mu, sigma)
-    valores.append(temp)
+#for i in range(L):
+#    temp = random.gauss(mu, sigma)
+#    valores.append(temp)
 
-#Defino funcion para calcular el valor medio de un vector
+# Defino funcion para calcular el valor medio de un vector
 def valor_medio(valores):
     sumatoria = 0
     for i in valores:
         sumatoria += i
     return sumatoria / len(valores)
 
-#Defino funcion para calcular el desvío estandar de un vector
-medio = valor_medio(valores)
+# Defino funcion para calcular el desvío estandar de un vector
+# medio = valor_medio(valores)
 def desvio_estandar(medio, valores):
     sumatoria = 0
     for i in valores:
         sumatoria += (i - medio)**2
     ds = (sumatoria/(len(valores)-1))**0.5
     error = 100-ds*100/1
-    return "El desvio estandar obtenido es ", ds ," y el error es de ", error ,"%"
+    # return "El desvio estandar obtenido es ", ds ," y el error es de ", error ,"%"
+    return ds, error
+
+# Inicializo arrays para guardar los datos
+arrayTabla = [5, 10, 100, 1000, 10000, 100000]
+averageArray = []
+dsArray = []
+errorArray = []
+
+# Itero para dar valores a los arrays creados
+for i in arrayTabla:
+    L = i
+    signal = []
+    for i in range(L):
+        temp = random.gauss(mu, sigma)
+        signal.append(temp)
+    average = valor_medio(signal)
+    averageArray.append(average)
+    ds, error = desvio_estandar(average, signal)
+    dsArray.append(ds)
+    errorArray.append(error)
+
+# Creo los arrays de datos para la tabla
+sdErrorList = np.array([np.array(arrayTabla).astype(str), np.around(dsArray, 2), np.around(errorArray,2)])
+cell_text = sdErrorList.transpose()
+colLabels = ['L', 'Sigma', 'Error %']
+
+# Grafico la tabla
+plt.figure(figsize=(25,15))
+fig, ax = plt.subplots()
+fig.patch.set_visible(False)
+ax.axis('off')
+ax.axis('tight')
+plt.table(  cellText=cell_text,
+            colLabels=colLabels,
+            loc='center')
+plt.show()
+
 # %%
 
 #Ejercicio 3
@@ -117,19 +157,20 @@ AX3max = np.amax(AX3)
 AX3 = AX3 * (1/AX3max)
 
 #Grafico las 3 señales normalizadas
+plt.figure(figsize=(25,15))
 plt.subplot(2,2,1)
 plt.plot(t, AX1)
 plt.xlabel("Tiempo")
 plt.ylabel("AX1")
 plt.xlim(0, 16/f0)
-plt.show()
+
 
 plt.subplot(2,2,2)
 plt.plot(t, AX2)
 plt.xlabel("Tiempo")
 plt.ylabel("AX2")
 plt.xlim(0, 16/f0)
-plt.show()
+
 
 plt.subplot(2,2,3)
 plt.plot(t, AX3)
@@ -145,4 +186,9 @@ def Señal_Ruido(A,sigma):
         return "La relacion señal ruido es ", SNR
    
 
+
+
+# %%
+
+# Ejercicio 4
 
