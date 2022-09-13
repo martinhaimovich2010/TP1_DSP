@@ -1,19 +1,23 @@
 #%%
 #Ejercicio 1
+
 #Importo bibliotecas
 import numpy as np
 import matplotlib.pyplot as plt
+
 # Defino los parametros de frecuencia, frecuencia de muestreo, numero de armonicos, etc
 f0 = 440
 fs = 44100
 K = 5
+
 #Defino la cantidad de muestras por 2 segundos (regla de 3)
 N = (2*fs)//1
+
 #Defino un vector n cuyos elementos irán desde 0 hasta el numero de muestra que se encuentra en el segundo 2
 n = np.arange(N)
 
 # Genero el vector tiempo de 2 segundos
-t=np.linspace(0,2,N)
+t = np.linspace(0,2,N)
 
 #Defino un vector A que esta lleno de ceros, cuya cantidad de elementos es igual a las muestras en 2 seg (N)
 A = np.zeros(N)
@@ -28,7 +32,8 @@ for k in range(1,K+1):
     plt.plot(t,ck_signal)
     plt.grid()
     plt.xlim(0,(8/f0))
-    plt.title('Señal LA 440 con %i armonicos' %k)
+    plt.ylim(-1,1)
+    plt.title('Armónico %i' %k)
     plt.xlabel("Tiempo [s]")
     plt.ylabel("Amplitud")   
 
@@ -46,35 +51,15 @@ plt.xlabel("Tiempo [s]")
 plt.ylabel("Amplitud Normalizada")
 plt.show()
 
-#Grafico cada armónico por separado
-#plt.figure(figsize=(25,15))
-#for k in range(1,K+1):
-    #plt.subplot(3,3,k)
-    #plt.plot(t,A)
-    #plt.grid()
-    #plt.xlim(0,(1/f0))
-    #plt.title(("Señal LA 440 con ",k, "armonicos"))
-    #plt.xlabel("Tiempo [s]")
-    #plt.ylabel("Amplitud Normalizada")
-#plt.show()
-
 #%%
 
 #Ejercicio 2
 
 import random
-# Defino una señal aleatoria de longitud L
-# L = int(input("Introducir longitud de la señal aleatoria: "))
-# valores = []
 
 # Defino los parámetros
 mu = 0
 sigma = 1
-
-
-#for i in range(L):
-#    temp = random.gauss(mu, sigma)
-#    valores.append(temp)
 
 # Defino funcion para calcular el valor medio de un vector
 def valor_medio(valores):
@@ -91,7 +76,6 @@ def desvio_estandar(medio, valores):
         sumatoria += (i - medio)**2
     ds = (sumatoria/(len(valores)-1))**0.5
     error = 100-ds*100/1
-    # return "El desvio estandar obtenido es ", ds ," y el error es de ", error ,"%"
     return ds, error
 
 # Inicializo arrays para guardar los datos
@@ -182,27 +166,12 @@ plt.show()
 #Defino formula que calcula relacion señal ruido
 def Señal_Ruido(A,sigma,f_A):
     SNR = np.amax(A)/sigma
-    # if SNR > 3:
-        # return "La relacion señal ruido es ", SNR
     return SNR
-    # else:
-    #     signallessNoise = []
-    #     for i in A:
-    #         j=f_A
-    #         if ((j % f_A) == 0):
-    #             signallessNoise.append(i)
-    #         j=j+1
-    #     noisySNR, error = desvio_estandar(valor_medio(signallessNoise), signallessNoise)
-    #     return noisySNR
-
 
 SNR1 = Señal_Ruido(AX1,sigma1,fs/f0)
 SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
 SNR3 = Señal_Ruido(AX3,sigma3,fs/f0)
-   
-print(SNR1)
-print(SNR2)
-print(SNR3)
+
 
 # FALTA: Presentar resultados en tabla y analizar que pasa si agrego una componente de DC
 
