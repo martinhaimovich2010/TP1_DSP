@@ -25,8 +25,7 @@ A = np.zeros(N)
 #Voy agregandole elementos al vector A (armonicos) y grafico cada armonico
 plt.figure(figsize=(25,15))
 for k in range(1,K+1):
-    ck = ((-1)**k)/(k*np.pi)
-    ck_signal = (1/k) * ck * np.sin(2*n*k*np.pi*(f0/fs))
+    ck_signal = (1/k) * np.sin(2*n*k*np.pi*(f0/fs))
     A += ck_signal
     plt.subplot(3,3,k)
     plt.plot(t,ck_signal)
