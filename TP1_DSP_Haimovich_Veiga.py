@@ -4,6 +4,7 @@
 #Importo bibliotecas
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.signal as sig
 
 # Defino los parametros de frecuencia, frecuencia de muestreo, numero de armonicos, etc
 f0 = 440
@@ -25,11 +26,10 @@ A = np.zeros(N)
 #Voy agregandole elementos al vector A (armonicos) y grafico cada armonico
 plt.figure(figsize=(25,15))
 for k in range(1,K+1):
-    ck = ((-1)**k)/(k*np.pi)
-    ck_signal = (1/k) * ck * np.sin(2*n*k*np.pi*(f0/fs))
-    A += ck_signal
+    armonicos = (1/k) * np.sin(2*n*k*np.pi*(f0/fs))
+    A += armonicos
     plt.subplot(3,3,k)
-    plt.plot(t,ck_signal)
+    plt.plot(t,armonicos)
     plt.grid()
     plt.xlim(0,(8/f0))
     plt.ylim(-1,1)
@@ -173,7 +173,23 @@ SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
 SNR3 = Señal_Ruido(AX3,sigma3,fs/f0)
 
 
-# FALTA: Presentar resultados en tabla y analizar que pasa si agrego una componente de DC
+
+# Creo los arrays de datos para la tabla
+sdErrorList = np.array([("Señal 1", "Señal 2", "Señal 3"), (sigma1, sigma2, sigma3) , (SNR1, SNR2, SNR3)])
+cell_text = sdErrorList.transpose()
+colLabels = ['Señal con ruido', 'Sigma', 'SNR']
+
+# Grafico la tabla
+plt.figure(figsize=(25,15))
+fig, ax = plt.subplots()
+fig.patch.set_visible(False)
+ax.axis('off')
+ax.axis('tight')
+plt.table(  cellText=cell_text,
+            colLabels=colLabels,
+            loc='center')
+plt.show()
+# FALTA: Analizar que pasa si agrego una componente de DC
 
 # %%
 
@@ -233,6 +249,67 @@ plt.ylabel("Amplitud Normalizada")
 plt.xlim(0, 16/f0)
 plt.show()
 
+# Creo los arrays de datos para la tabla
+Average_SNR_List = np.array([("10", "100", "1000"), (averageA_RN10, averageA_RN100, averageA_RN1000), (SNR_average10, SNR_average100, SNR_average1000), (SNR1, SNR2, SNR3)])
+cell_text = Average_SNR_List.transpose()
+colLabels = ['Cantidad de señales de ruido', 'Promedio', 'SNR promedio', 'SNR ejercicio 3']
+
+# Grafico la tabla
+plt.figure(figsize=(25,15))
+fig, ax = plt.subplots()
+fig.patch.set_visible(False)
+ax.axis('off')
+ax.axis('tight')
+plt.table(  cellText=cell_text,
+            colLabels=colLabels,
+            loc='center')
+
 # FALTA: Presentar datos en tabla y chequear si el SNR está bien calculado (Ej. 3)
 
 # %%
+
+#Ejercicio 5
+
+"""#Defino la funcion del filtro de media movil
+def mediaMovilD(x, M):
+    #Transformo la señal a filtrar para analizarla en funcion de la frecuencia
+    x_f = np.fft.rfft(x)
+    #Normalizo
+    x_f_max = np.amax(x_f)
+    x_f = x_f / x_f_max 
+
+    #Genero un vector frecuencia que va de 0 a la frecuencia maxima
+    f_max = 22000
+    f = np.arange(0,f_max,f_max/len(x_f))
+
+    #Grafico la señal transformada en funcion de la frecuencia
+    plt.figure(figsize=(25,15))
+    plt.plot(f, abs(x_f))
+    plt.xlabel("Frecuencia [Hz]")
+    plt.ylabel("Amplitud")
+    plt.title("Respuesta en frecuencia señal original")
+    plt.show()
+    
+    w = np.append(np.ones(M), np.zeros(len(t)-M))
+    #Normalizo el filtro
+    w = w / len(w)
+    #Transformo el filtro para ver su respuesta en , luego lo normalizo
+    w_f = np.fft.rfft(w)/np.max(np.fft.rfft(w))
+    #Convoluciono la señal con la ventana
+    
+    x_convolve = np.convolve(x, w, mode='same')
+    return x_convolve
+
+Filtrado_Senoidal = mediaMovilD(A, 500)"""
+
+def mediaMovilD(x, M):
+    w = np.append(np.ones(M), np.zeros(len(t)-M))
+    #Normalizo
+    w = w / len(w)
+    #Defino filtro de media movil
+    w = (1/M) * np.ones(np.int(M))
+    #Convoluciono el filtro con la señal
+    x_conv = sig.fftconvolve(w, x, mode='same')
+    return plt.plot(t, x_conv[:N]), plt.xlim(0, 8/f0)
+
+filtrado1 = mediaMovilD(A, 10)
