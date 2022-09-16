@@ -26,13 +26,8 @@ A = np.zeros(N)
 #Voy agregandole elementos al vector A (armonicos) y grafico cada armonico
 plt.figure(figsize=(25,15))
 for k in range(1,K+1):
-<<<<<<< HEAD
-    ck_signal = (1/k) * np.sin(2*n*k*np.pi*(f0/fs))
-    A += ck_signal
-=======
     armonicos = (1/k) * np.sin(2*n*k*np.pi*(f0/fs))
     A += armonicos
->>>>>>> 5284faa592618510ad9f8a2c12f2551d531d85ea
     plt.subplot(3,3,k)
     plt.plot(t,armonicos)
     plt.grid()
@@ -254,9 +249,6 @@ plt.ylabel("Amplitud Normalizada")
 plt.xlim(0, 16/f0)
 plt.show()
 
-<<<<<<< HEAD
-# FALTA: Presentar datos en tabla
-=======
 # Creo los arrays de datos para la tabla
 Average_SNR_List = np.array([("10", "100", "1000"), (averageA_RN10, averageA_RN100, averageA_RN1000), (SNR_average10, SNR_average100, SNR_average1000), (SNR1, SNR2, SNR3)])
 cell_text = Average_SNR_List.transpose()
@@ -273,7 +265,6 @@ plt.table(  cellText=cell_text,
             loc='center')
 
 # FALTA: Presentar datos en tabla y chequear si el SNR está bien calculado (Ej. 3)
->>>>>>> 5284faa592618510ad9f8a2c12f2551d531d85ea
 
 # %%
 
