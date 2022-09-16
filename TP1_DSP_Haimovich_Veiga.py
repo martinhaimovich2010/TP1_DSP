@@ -232,6 +232,6 @@ plt.ylabel("Amplitud Normalizada")
 plt.xlim(0, 16/f0)
 plt.show()
 
-# FALTA: Presentar datos en tabla y chequear si el SNR está bien calculado (Ej. 3)
+# FALTA: Presentar datos en tabla
 
 # %%
