@@ -51,6 +51,8 @@ plt.xlabel("Tiempo [s]")
 plt.ylabel("Amplitud Normalizada")
 plt.show()
 
+print("Se puede ver que la señal resultante es una diente de sierra")
+
 #%%
 
 #Ejercicio 2
@@ -113,6 +115,8 @@ plt.table(  cellText=cell_text,
             loc='center')
 plt.show()
 
+print("Se puede ver que a medida que la señal aleatoria aumenta su dimensión, el desvío estandar tiende a 1, con un error cada vez menor, aproximandose al caso ideal de distribucion normal")
+
 # %%
 
 #Ejercicio 3
@@ -172,15 +176,26 @@ SNR1 = Señal_Ruido(AX1,sigma1,fs/f0)
 SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
 SNR3 = Señal_Ruido(AX3,sigma3,fs/f0)
 
+#Agregandole a cada señal un componente de continua
+C = int(input("Definir un valor para la componente de continua: "))
 
+#Sumando el componente de continua a cada señal
+AX1_C = AX1 + C
+AX2_C = AX2 + C
+AX3_C = AX3 + C
+
+#Calculando SNR a cada señal con componente de continua
+SNR4 = Señal_Ruido(AX1_C,sigma1,fs/f0)
+SNR5 = Señal_Ruido(AX2_C,sigma2,fs/f0)
+SNR6 = Señal_Ruido(AX3_C,sigma3,fs/f0)
 
 # Creo los arrays de datos para la tabla
-sdErrorList = np.array([("Señal 1", "Señal 2", "Señal 3"), (sigma1, sigma2, sigma3) , (SNR1, SNR2, SNR3)])
+sdErrorList = np.array([("Señal 1", "Señal 2", "Señal 3"), (sigma1, sigma2, sigma3) , (SNR1, SNR2, SNR3), (SNR4, SNR5, SNR6)])
 cell_text = sdErrorList.transpose()
-colLabels = ['Señal con ruido', 'Sigma', 'SNR']
+colLabels = ['Señal con ruido', 'Sigma', 'SNR', 'SNR con continua']
 
 # Grafico la tabla
-plt.figure(figsize=(25,15))
+plt.figure(figsize=(55,45))
 fig, ax = plt.subplots()
 fig.patch.set_visible(False)
 ax.axis('off')
@@ -189,6 +204,10 @@ plt.table(  cellText=cell_text,
             colLabels=colLabels,
             loc='center')
 plt.show()
+
+print("A medida que el desvio estandar es menor, la relacion señal ruido aumenta, este resultado es coherente con la formula planteada")
+print("Si le sumo un componente de continua, si este valor es positivo, SNR aumenta") #NO SE SI ESTA BIEN ESTO
+
 # FALTA: Analizar que pasa si agrego una componente de DC
 
 # %%
@@ -270,39 +289,93 @@ plt.table(  cellText=cell_text,
 
 #Ejercicio 5
 
-"""#Defino la funcion del filtro de media movil
+from scipy import fftpack
+
+
+
+
 def mediaMovilD(x, M):
-    #Transformo la señal a filtrar para analizarla en funcion de la frecuencia
-    x_f = np.fft.rfft(x)
-    #Normalizo
-    x_f_max = np.amax(x_f)
-    x_f = x_f / x_f_max 
-
-    #Genero un vector frecuencia que va de 0 a la frecuencia maxima
-    f_max = 22000
-    f = np.arange(0,f_max,f_max/len(x_f))
-
-    #Grafico la señal transformada en funcion de la frecuencia
-    plt.figure(figsize=(25,15))
-    plt.plot(f, abs(x_f))
+    #Transformo la señal a filtrar y la normalizo
+    X = np.fft.rfft(x) / np.amax(np.fft.rfft(x))
+    #Defino vector de frecuencia
+    f = fftpack.fftfreq(len(x))*fs
+    #Grafico la señal a filtrar y su transformada
+    plt.figure(1)
+    plt.subplot(3,2,1)
+    plt.plot(t, A)
+    plt.xlim(0, 8/f0)
+    plt.subplot(3,2,2)
+    plt.plot(f[:-fs+1], abs(X))
+    plt.xlim(0, 2500)
+    plt.xticks([440, 880, 1320, 1760, 2200], ['440', '880','1320','1760','2200'])
+    
+    #Defino filtro de media movil y lo normalizo
+    w = np.append(np.ones(M), np.zeros(len(t)-M))
+    w = w / np.amax(w)
+    #Grafico w
+    plt.subplot(3,2,3)
+    plt.plot(t, w)
+    "plt.xlim(0, 8/f0)"
+    #Transformo el filtro y lo normalizo
+    W = np.fft.rfft(w) / np.amax(np.fft.rfft(w))
+    #Grafico W, deberia quedar una funcion sinc
+    """plt.subplot(3,2,4)
+    plt.plot(f, W)
+    plt.xlim(0, 2500)"""
+    
+    #Para filtrar, multiplico las transformadas de la señal y la del filtro
+    #Es lo mismo que convolucionar la señal y la ventana
+    Y = X * W
+    #Grafico la señal filtrada
+    plt.subplot(3,2,5)
+    plt.plot(f[:-fs+1], abs(Y))
+    plt.xlim(0, 2500)
     plt.xlabel("Frecuencia [Hz]")
     plt.ylabel("Amplitud")
-    plt.title("Respuesta en frecuencia señal original")
-    plt.show()
+    plt.title("Señal transformada filtrada")
     
-    w = np.append(np.ones(M), np.zeros(len(t)-M))
-    #Normalizo el filtro
-    w = w / len(w)
-    #Transformo el filtro para ver su respuesta en , luego lo normalizo
-    w_f = np.fft.rfft(w)/np.max(np.fft.rfft(w))
-    #Convoluciono la señal con la ventana
+    #Antitransformo la señal filtrada
+    y = np.fft.ifft(Y)
+    #Grafico y en funcion del tiempo
+    plt.subplot(3,2,6)
+    plt.plot(t, y)
+    plt.xlim(0, 8/f0)
+    plt.xlabel("Tiempo")
+    plt.ylabel("Amplitud")
+    plt.title("Señal original filtrada")
     
-    x_convolve = np.convolve(x, w, mode='same')
-    return x_convolve
+    return plt.plot(t, y)
 
-Filtrado_Senoidal = mediaMovilD(A, 500)"""
+filtranding = mediaMovilD(A, 1000)
 
-def mediaMovilD(x, M):
+#%%
+#Ejercicio 6
+
+w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
+h = np.convolve(A, w, mode='same')
+h = h / np.amax(h)
+
+plt.figure(1)
+#Grafico la convolucion entre w y la señal del ejercicio 1
+plt.subplot(1,2,1)
+plt.plot(t, h)
+plt.xlim(0, 8/f0)
+plt.ylim(-1,1)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud")
+
+#Grafico la señal filtrada del ejercicio 5
+plt.subplot(1,2,2)
+filtranding = mediaMovilD(A, 1000)
+plt.plot(t, y)
+plt.xlim(0, 8/f0)
+plt.ylim(-1,1)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud")
+
+plt.show()
+
+"""def mediaMovilD(x, M):
     w = np.append(np.ones(M), np.zeros(len(t)-M))
     #Normalizo
     w = w / len(w)
@@ -312,4 +385,25 @@ def mediaMovilD(x, M):
     x_conv = sig.fftconvolve(w, x, mode='same')
     return plt.plot(t, x_conv[:N]), plt.xlim(0, 8/f0)
 
-filtrado1 = mediaMovilD(A, 10)
+filtrado1 = mediaMovilD(A, 10)"""
+
+#%%
+
+#Ejercicio 7
+
+a0 = 0.42
+a1 = 0.5
+a2 = 0.08
+blackMan = a0 - a1 * np.cos((2*np.pi*n)/(M-1)) + a2 * np.cos((4*np.pi*n)/(M-1)) 
+#Convoluciono el filtro black man con la señal del ejercicio 1
+convBlack = np.convolve(A, blackMan, mode='same')
+#normalizo
+convBlack = convBlack / np.amax(convBlack)
+
+#Grafico
+plt.figure(1)
+plt.plot(t, convBlack)
+plt.xlim(0, 8/f0)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud")
+plt.show()
