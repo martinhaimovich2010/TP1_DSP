@@ -283,7 +283,7 @@ plt.table(  cellText=cell_text,
             colLabels=colLabels,
             loc='center')
 
-# FALTA: Presentar datos en tabla y chequear si el SNR está bien calculado (Ej. 3)
+# FALTA: Dar formato a tabla
 
 # %%
 
@@ -297,6 +297,7 @@ from scipy import fftpack
 def mediaMovilD(x, M):
     #Transformo la señal a filtrar y la normalizo
     X = np.fft.rfft(x) / np.amax(np.fft.rfft(x))
+    print(X[0])
     #Defino vector de frecuencia
     f = fftpack.fftfreq(len(x))*fs
     #Grafico la señal a filtrar y su transformada
@@ -338,18 +339,21 @@ def mediaMovilD(x, M):
     y = np.fft.ifft(Y)
     #Grafico y en funcion del tiempo
     plt.subplot(3,2,6)
-    plt.plot(t, y)
+    plt.plot(np.linspace(0,2,len(y)), y)
     plt.xlim(0, 8/f0)
     plt.xlabel("Tiempo")
     plt.ylabel("Amplitud")
     plt.title("Señal original filtrada")
     
-    return plt.plot(t, y)
+    return plt.plot(np.linspace(0,2,len(y)), y)
 
-filtranding = mediaMovilD(A, 1000)
+filtranding = mediaMovilD(A, 22000)
 
+# NACHO -> Ver recursiva
 #%%
 #Ejercicio 6
+
+M = 22000
 
 w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
 h = np.convolve(A, w, mode='same')
@@ -366,7 +370,7 @@ plt.ylabel("Amplitud")
 
 #Grafico la señal filtrada del ejercicio 5
 plt.subplot(1,2,2)
-filtranding = mediaMovilD(A, 1000)
+# filtranding = mediaMovilD(A, 1000)
 plt.plot(t, y)
 plt.xlim(0, 8/f0)
 plt.ylim(-1,1)
@@ -391,10 +395,15 @@ filtrado1 = mediaMovilD(A, 10)"""
 
 #Ejercicio 7
 
+M = 22000
+
 a0 = 0.42
 a1 = 0.5
 a2 = 0.08
-blackMan = a0 - a1 * np.cos((2*np.pi*n)/(M-1)) + a2 * np.cos((4*np.pi*n)/(M-1)) 
+blackMan = np.zeros(M)
+for i in range(M):
+    blackMan[i] = a0 - a1 * np.cos((2*np.pi*i)/(M-1)) + a2 * np.cos((4*np.pi*i)/(M-1)) 
+
 #Convoluciono el filtro black man con la señal del ejercicio 1
 convBlack = np.convolve(A, blackMan, mode='same')
 #normalizo
@@ -403,7 +412,9 @@ convBlack = convBlack / np.amax(convBlack)
 #Grafico
 plt.figure(1)
 plt.plot(t, convBlack)
-plt.xlim(0, 8/f0)
+# plt.xlim(0, 1/f0)
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
 plt.show()
+
+# %%
