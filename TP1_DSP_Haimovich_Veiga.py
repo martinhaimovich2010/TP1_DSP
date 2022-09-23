@@ -395,7 +395,7 @@ filtrado1 = mediaMovilD(A, 10)"""
 
 #Ejercicio 7
 
-M = 22000
+M = 100
 
 a0 = 0.42
 a1 = 0.5
@@ -412,7 +412,7 @@ convBlack = convBlack / np.amax(convBlack)
 #Grafico
 plt.figure(1)
 plt.plot(t, convBlack)
-# plt.xlim(0, 1/f0)
+plt.xlim(0, 8/f0)
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
 plt.show()
