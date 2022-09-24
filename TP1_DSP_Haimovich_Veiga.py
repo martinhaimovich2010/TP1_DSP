@@ -169,7 +169,7 @@ plt.show()
 
 #Defino formula que calcula relacion señal ruido
 def Señal_Ruido(A,sigma,f_A):
-    SNR = np.amax(A)/sigma
+    SNR = np.round((np.amax(A)-np.mean(A))/sigma,2)
     return SNR
 
 SNR1 = Señal_Ruido(AX1,sigma1,fs/f0)
@@ -195,7 +195,7 @@ cell_text = sdErrorList.transpose()
 colLabels = ['Señal con ruido', 'Sigma', 'SNR', 'SNR con continua']
 
 # Grafico la tabla
-plt.figure(figsize=(55,45))
+plt.figure(figsize=(100,45))
 fig, ax = plt.subplots()
 fig.patch.set_visible(False)
 ax.axis('off')
@@ -206,7 +206,7 @@ plt.table(  cellText=cell_text,
 plt.show()
 
 print("A medida que el desvio estandar es menor, la relacion señal ruido aumenta, este resultado es coherente con la formula planteada")
-print("Si le sumo un componente de continua, si este valor es positivo, SNR aumenta") #NO SE SI ESTA BIEN ESTO
+print("Si le sumo un componente de continua, si este valor es positivo, SNR aumenta") #NO ESTA BIEN ESTO
 
 # FALTA: Analizar que pasa si agrego una componente de DC
 
@@ -246,27 +246,27 @@ print(SNR_average10)
 print(SNR_average100)
 print(SNR_average1000)
 
-plt.figure(figsize=(25,15))
-plt.subplot(2,2,1)
-plt.plot(t, averageA_RN10)
-plt.xlabel("Tiempo")
-plt.ylabel("Amplitud Normalizada")
-plt.xlim(0, 16/f0)
+# plt.figure(figsize=(25,15))
+# plt.subplot(2,2,1)
+# plt.plot(t, averageA_RN10)
+# plt.xlabel("Tiempo")
+# plt.ylabel("Amplitud Normalizada")
+# plt.xlim(0, 16/f0)
 
 
-plt.subplot(2,2,2)
-plt.plot(t, averageA_RN100)
-plt.xlabel("Tiempo")
-plt.ylabel("Amplitud Normalizada")
-plt.xlim(0, 16/f0)
+# plt.subplot(2,2,2)
+# plt.plot(t, averageA_RN100)
+# plt.xlabel("Tiempo")
+# plt.ylabel("Amplitud Normalizada")
+# plt.xlim(0, 16/f0)
 
 
-plt.subplot(2,2,3)
-plt.plot(t, averageA_RN1000)
-plt.xlabel("Tiempo")
-plt.ylabel("Amplitud Normalizada")
-plt.xlim(0, 16/f0)
-plt.show()
+# plt.subplot(2,2,3)
+# plt.plot(t, averageA_RN1000)
+# plt.xlabel("Tiempo")
+# plt.ylabel("Amplitud Normalizada")
+# plt.xlim(0, 16/f0)
+# plt.show()
 
 # Creo los arrays de datos para la tabla
 Average_SNR_List = np.array([("10", "100", "1000"), (averageA_RN10, averageA_RN100, averageA_RN1000), (SNR_average10, SNR_average100, SNR_average1000), (SNR1, SNR2, SNR3)])
@@ -291,106 +291,53 @@ plt.table(  cellText=cell_text,
 
 from scipy import fftpack
 
-
-
-
-def mediaMovilD(x, M):
-    #Transformo la señal a filtrar y la normalizo
-    X = np.fft.rfft(x) / np.amax(np.fft.rfft(x))
-    print(X[0])
-    #Defino vector de frecuencia
-    f = fftpack.fftfreq(len(x))*fs
-    #Grafico la señal a filtrar y su transformada
-    plt.figure(1)
-    plt.subplot(3,2,1)
-    plt.plot(t, A)
-    plt.xlim(0, 8/f0)
-    plt.subplot(3,2,2)
-    plt.plot(f[:-fs+1], abs(X))
-    plt.xlim(0, 2500)
-    plt.xticks([440, 880, 1320, 1760, 2200], ['440', '880','1320','1760','2200'])
-    
-    #Defino filtro de media movil y lo normalizo
-    w = np.append(np.ones(M), np.zeros(len(t)-M))
-    w = w / np.amax(w)
-    #Grafico w
-    plt.subplot(3,2,3)
-    plt.plot(t, w)
-    "plt.xlim(0, 8/f0)"
-    #Transformo el filtro y lo normalizo
-    W = np.fft.rfft(w) / np.amax(np.fft.rfft(w))
-    #Grafico W, deberia quedar una funcion sinc
-    """plt.subplot(3,2,4)
-    plt.plot(f, W)
-    plt.xlim(0, 2500)"""
-    
-    #Para filtrar, multiplico las transformadas de la señal y la del filtro
-    #Es lo mismo que convolucionar la señal y la ventana
-    Y = X * W
-    #Grafico la señal filtrada
-    plt.subplot(3,2,5)
-    plt.plot(f[:-fs+1], abs(Y))
-    plt.xlim(0, 2500)
-    plt.xlabel("Frecuencia [Hz]")
-    plt.ylabel("Amplitud")
-    plt.title("Señal transformada filtrada")
-    
-    #Antitransformo la señal filtrada
-    y = np.fft.ifft(Y)
-    #Grafico y en funcion del tiempo
-    plt.subplot(3,2,6)
-    plt.plot(np.linspace(0,2,len(y)), y)
-    plt.xlim(0, 8/f0)
-    plt.xlabel("Tiempo")
-    plt.ylabel("Amplitud")
-    plt.title("Señal original filtrada")
-    plt.show()
-    
-    return plt.plot(np.linspace(0,2,len(y)), y)
-
-filtranding = mediaMovilD(A, 42100)
-
-# NACHO -> Ver recursiva
-#%%
-#Ejercicio 6
-
-M = 22000
-
-w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
-h = np.convolve(A, w, mode='same')
-h = h / np.amax(h)
-
-plt.figure(1)
-#Grafico la convolucion entre w y la señal del ejercicio 1
-plt.subplot(1,2,1)
-plt.plot(t, h)
-plt.xlim(0, 8/f0)
-plt.ylim(-1,1)
-plt.xlabel("Tiempo")
-plt.ylabel("Amplitud")
-
-#Grafico la señal filtrada del ejercicio 5
-plt.subplot(1,2,2)
-# filtranding = mediaMovilD(A, 1000)
-plt.plot(t, y)
-plt.xlim(0, 8/f0)
-plt.ylim(-1,1)
-plt.xlabel("Tiempo")
-plt.ylabel("Amplitud")
-
-plt.show()
+"""def mediaMovilD(x, M):
+    L = x.shape[0]
+    x_sample = np.zeros([L+(M-1), 1]) * 1.0
+    x_sample[(M-1):] = x
+    y = np.zeros(x.shape)
+    for i in range(0, L):
+        y[i] = x_sample[i, i+(M)].sum() / float(M)
+    return y"""
 
 """def mediaMovilD(x, M):
-    w = np.append(np.ones(M), np.zeros(len(t)-M))
-    #Normalizo
-    w = w / len(w)
-    #Defino filtro de media movil
-    w = (1/M) * np.ones(np.int(M))
-    #Convoluciono el filtro con la señal
-    x_conv = sig.fftconvolve(w, x, mode='same')
-    return plt.plot(t, x_conv[:N]), plt.xlim(0, 8/f0)
+    x_sample = x.shape[0]
+    x_sample = x
+    y = np.zeros(x.shape)
+    for i in range(len(x)):
+        y =+ x
+    y = y/M
+    y = y / np.amax(y)
+    return y"""
 
-filtrado1 = mediaMovilD(A, 10)"""
+
+"""def mediaMovilD(x, M):
+    y = np.zeros(x.shape)
+    for i in range(int(0 + M/2), int(len(t)-(M/2)+1)):
+        y[i] = 0
+        for j in range(int(-M/2), int((M/2)+1)):
+            y[i] =+ x[i+j]
+        y = y[i] / M
+    return y"""
+
+def mediaMovilD(x, M):
+    t5 = x.shape[0]
+    x_temp = np.zeros([t5, 1]) * 1.0
+    x_temp = x
+    y = np.zeros(x.shape)
+    for i in range(0, t5):
+        y[i] = x_temp[i:i+(M)].sum() / float(M)
+    y = y / np.amax(y)
+    return y
+
+
+filtranding = mediaMovilD(A, 10)
+plt.figure(1)
+plt.plot(t, filtranding)
+plt.xlim(0, 8/f0)
+plt.ylim(-2,2)
+
+
 
 #%%
 
@@ -419,3 +366,128 @@ plt.ylabel("Amplitud")
 plt.show()
 
 # %%
+
+#Ejercicio 8
+
+#Importo libreria soundfile
+import soundfile as sf
+import sounddevice as sd
+
+#Importo archivo de audio y lo guardo en variable respuesta al impulso h
+h, fs = sf.read('Resp_Imp.wav')
+
+#Defino funciones a utilizar
+
+def circular_convolve(in1, in2, period):
+    """
+    Circular convolution of two 1-dimensional arrays.
+    Circular convolve `in1` and `in2` with given `period`.
+    Parameters
+    ----------
+    in1 : array_like, 1-D
+        First input.
+    in2 : array_like, 1-D
+        Second input. Should have the same number of dimensions as `in1`.
+  period : int
+        Period of the circular convolution.
+    Returns
+    -------
+    result : array, 1-D
+        A 1-dimensional array containing the result of the circular
+        convolution of `in1` with `in2`.
+    See Also
+    --------
+    convolve
+    Notes
+    -----
+    The (modulo-M) circular/cyclic/periodic convolution of period :math:`M`
+    of the two signals :math:`x[k]` and :math:`h[k]` is defined as
+    .. math::
+        y[k] = \sum_{\kappa=0}^{M-1} \tilde{x}[k - \kappa] \; \tilde{h}[\kappa]
+    where the periodic summations :math:`\tilde{x}[k]` and `\tilde{h}[\kappa]`
+    of :math:`x[k]` and :math:`x[k]` are defined as
+    .. math::
+        \tilde{x}[k] &= \sum_{m = -\infty}^{\infty} x[m \cdot M + k] \\
+        \tilde{h}[k] &= \sum_{m = -\infty}^{\infty} h[m \cdot M + k]
+    Examples
+    --------
+    Equivalence of circular and linear convolution:
+    >>> from scipy import signal
+    >>> a = np.ones(5)
+    >>> b = np.ones(5)
+    >>> circular_convolve(a, b, 5)
+    array([ 5.,  5.,  5.,  5.,  5.])
+    >>> np.convolve(a, b, mode='full')
+    array([ 1.,  2.,  3.,  4.,  5.,  4.,  3.,  2.,  1.])
+    >>> circular_convolve(a, b, 9)
+    array([ 1.,  2.,  3.,  4.,  5.,  4.,  3.,  2.,  1.])
+    """
+    in1 = _periodic_summation(in1, period)
+    in2 = _periodic_summation(in2, period)
+
+    return np.fromiter([np.dot(np.roll(in1[::-1], k+1), in2)
+                        for k in np.arange(period)], float)
+
+
+def _periodic_summation(x, period):
+    """
+    Periodic summation of 1-dimensional array or zero-padding.
+    If the length of the array is longer or equal to the given `period`
+    a periodic summation of `x` is perfomed, otherwise zero-padding to length
+    `period`.
+    """
+    len_x = len(x)
+    rows = int(np.ceil(len_x/period))
+
+    if (len_x < int(period*rows)):
+        x = np.pad(x, (0, int(period*rows-len_x)), 'constant')
+
+    x = np.reshape(x, (rows, period))
+
+    return np.sum(x, axis=0)
+
+
+#Convolucion lineal
+conv = np.convolve(A, h)
+conv = conv / np.amax(conv)
+
+#Convolucion circular
+#Usando funcion suma periodica igualo las longitudes de las 2 señales
+in1 = _periodic_summation(A, len(h))
+in2 = _periodic_summation(h, len(h))
+#Convolucion
+conv_circ = circular_convolve(A, h, len(h))
+conv_circ = conv_circ / np.amax(conv_circ)
+
+#Convolucion lineal mismo periodo que la circular
+#Usando funcion suma periodica llevo las longitudes a la longitud de la convolucion lineal
+in1 = _periodic_summation(A, len(conv))
+in2 = _periodic_summation(h, len(conv))
+#Convolucion
+circ_lin = circular_convolve(A, h, len(conv))
+circ_lin = circ_lin / np.amax(circ_lin)
+
+#Grafico las señales convolucionadas
+
+#Genero vectores de tiempo para cada señal a graficar
+t1 = np.linspace(0,8/f0,len(conv))
+t2 = np.linspace(0,8/f0,len(conv_circ))
+t3 = np.linspace(0,8/f0,len(circ_lin))
+
+#Grafico convolucion lineal
+plt.figure(figsize=(25,15))
+plt.subplot(2,2,1)
+plt.plot(t1, conv)
+
+#Grafico convolucion circular
+plt.subplot(2,2,2)
+plt.plot(t2, conv_circ)
+
+#Grafico convolucion circular de misma longitud que la lineal
+plt.subplot(2,2,3)
+plt.plot(t3, circ_lin)
+
+#Genero audios de las señales convolucionadas
+sf.write('Conv.wav',conv,fs)
+sf.write('Conv circular.wav',conv_circ,fs)
+sf.write('Circular (igual lineal).wav',circ_lin,fs)
