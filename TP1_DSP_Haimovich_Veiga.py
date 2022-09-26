@@ -58,6 +58,7 @@ print("Se puede ver que la señal resultante es una diente de sierra")
 #Ejercicio 2
 
 import random
+import plotly.graph_objects as go
 
 # Defino los parámetros
 mu = 0
@@ -100,20 +101,33 @@ for i in arrayTabla:
     errorArray.append(error)
 
 # Creo los arrays de datos para la tabla
-sdErrorList = np.array([np.array(arrayTabla).astype(str), np.around(dsArray, 2), np.around(errorArray,2)])
-cell_text = sdErrorList.transpose()
-colLabels = ['L', 'Sigma', 'Error %']
+# sdErrorList = np.array([np.array(arrayTabla).astype(str), np.around(dsArray, 2), np.around(errorArray,2)])
+# cell_text = sdErrorList.transpose()
+# colLabels = ['L', 'Sigma', 'Error %']
 
-# Grafico la tabla
-plt.figure(figsize=(25,15))
-fig, ax = plt.subplots()
-fig.patch.set_visible(False)
-ax.axis('off')
-ax.axis('tight')
-plt.table(  cellText=cell_text,
-            colLabels=colLabels,
-            loc='center')
-plt.show()
+# # Grafico la tabla
+# plt.figure(figsize=(25,15))
+# fig, ax = plt.subplots()
+# fig.patch.set_visible(False)
+# ax.axis('off')
+# ax.axis('tight')
+# plt.table(  cellText=cell_text,
+#             colLabels=colLabels,
+#             loc='center')
+# plt.show()
+
+DC_SNR_layout = go.Layout(
+    title='Desviación Estándar y Error según longitud de señal',
+    margin=go.layout.Margin(
+        autoexpand=True
+    )
+)
+
+fig = go.Figure(data=[go.Table(header=dict(values=['L', 'Sigma', 'Error %'],align='center'),
+                cells=dict(values=[np.array(arrayTabla).astype(str), np.around(dsArray, 2), np.around(errorArray,2)],align='center'))
+                ],
+                layout=DC_SNR_layout)
+fig.show()
 
 print("Se puede ver que a medida que la señal aleatoria aumenta su dimensión, el desvío estandar tiende a 1, con un error cada vez menor, aproximandose al caso ideal de distribucion normal")
 
@@ -177,38 +191,63 @@ SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
 SNR3 = Señal_Ruido(AX3,sigma3,fs/f0)
 
 #Agregandole a cada señal un componente de continua
-C = int(input("Definir un valor para la componente de continua: "))
+# C = int(input("Definir un valor para la componente de continua: "))
+DCcomps = [-1000, -10, 10, 1000]
 
 #Sumando el componente de continua a cada señal
-AX1_C = AX1 + C
-AX2_C = AX2 + C
-AX3_C = AX3 + C
+AX1_C1 = AX1 + DCcomps[0]
+AX2_C1 = AX2 + DCcomps[0]
+AX3_C1 = AX3 + DCcomps[0]
+
+AX1_C2 = AX1 + DCcomps[1]
+AX2_C2 = AX2 + DCcomps[1]
+AX3_C2 = AX3 + DCcomps[1]
+
+AX1_C3 = AX1 + DCcomps[2]
+AX2_C3 = AX2 + DCcomps[2]
+AX3_C3 = AX3 + DCcomps[2]
+
+AX1_C4 = AX1 + DCcomps[3]
+AX2_C4 = AX2 + DCcomps[3]
+AX3_C4 = AX3 + DCcomps[3]
 
 #Calculando SNR a cada señal con componente de continua
-SNR4 = Señal_Ruido(AX1_C,sigma1,fs/f0)
-SNR5 = Señal_Ruido(AX2_C,sigma2,fs/f0)
-SNR6 = Señal_Ruido(AX3_C,sigma3,fs/f0)
+SNR4 = Señal_Ruido(AX1_C1,sigma1,fs/f0)
+SNR5 = Señal_Ruido(AX2_C1,sigma2,fs/f0)
+SNR6 = Señal_Ruido(AX3_C1,sigma3,fs/f0)
+
+SNR7 = Señal_Ruido(AX1_C2,sigma1,fs/f0)
+SNR8 = Señal_Ruido(AX2_C2,sigma2,fs/f0)
+SNR9 = Señal_Ruido(AX3_C2,sigma3,fs/f0)
+
+SNR10 = Señal_Ruido(AX1_C3,sigma1,fs/f0)
+SNR11 = Señal_Ruido(AX2_C3,sigma2,fs/f0)
+SNR12 = Señal_Ruido(AX3_C3,sigma3,fs/f0)
+
+SNR13 = Señal_Ruido(AX1_C4,sigma1,fs/f0)
+SNR14 = Señal_Ruido(AX2_C4,sigma2,fs/f0)
+SNR15 = Señal_Ruido(AX3_C4,sigma3,fs/f0)
 
 # Creo los arrays de datos para la tabla
-sdErrorList = np.array([("Señal 1", "Señal 2", "Señal 3"), (sigma1, sigma2, sigma3) , (SNR1, SNR2, SNR3), (SNR4, SNR5, SNR6)])
+sdErrorList = np.array([("Señal 1", "Señal 2", "Señal 3"), (sigma1, sigma2, sigma3) , (SNR1, SNR2, SNR3), (SNR4, SNR5, SNR6), (SNR7, SNR8, SNR9), (SNR10, SNR11, SNR12), (SNR13, SNR14, SNR15)])
 cell_text = sdErrorList.transpose()
-colLabels = ['Señal con ruido', 'Sigma', 'SNR', 'SNR con continua']
+colLabels = ['Señal con ruido', 'Sigma', 'SNR', 'SNR con continua 1', 'SNR con continua 2', 'SNR con continua 3', 'SNR con continua 4']
 
-# Grafico la tabla
-plt.figure(figsize=(100,45))
-fig, ax = plt.subplots()
-fig.patch.set_visible(False)
-ax.axis('off')
-ax.axis('tight')
-plt.table(  cellText=cell_text,
-            colLabels=colLabels,
-            loc='center')
-plt.show()
+DC_SNR_layout = go.Layout(
+    title='Relaciones Señal-Ruido para distintas desviaciones estándar',
+    margin=go.layout.Margin(
+        autoexpand=True
+    )
+)
 
-print("A medida que el desvio estandar es menor, la relacion señal ruido aumenta, este resultado es coherente con la formula planteada")
-print("Si le sumo un componente de continua, si este valor es positivo, SNR aumenta") #NO ESTA BIEN ESTO
+fig = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Sigma', 'SNR', 'SNR con DC=-1000', 'SNR con DC=-10', 'SNR con DC=10', 'SNR con DC=1000'],align='center'),
+                cells=dict(values=[["Señal 1", "Señal 2", "Señal 3"], [sigma1, sigma2, sigma3] , [SNR1, SNR2, SNR3], [SNR4, SNR5, SNR6], [SNR7, SNR8, SNR9], [SNR10, SNR11, SNR12], [SNR13, SNR14, SNR15]],align='center'))
+                ],
+                layout=DC_SNR_layout)
+fig.show()
 
-# FALTA: Analizar que pasa si agrego una componente de DC
+print("A medida que el desvio estandar es menor, la relacion señal ruido aumenta, este resultado es coherente con la formula planteada.")
+print("El SNR no se modifica con la adición de una componente de continua.") 
 
 # %%
 
@@ -242,48 +281,41 @@ randNoiseSignals10, averageA_RN10, SNR_average10 = promedio_ensamble(10)
 randNoiseSignals100, averageA_RN100, SNR_average100 = promedio_ensamble(100)
 randNoiseSignals1000, averageA_RN1000, SNR_average1000 = promedio_ensamble(1000)
 
-print(SNR_average10)
-print(SNR_average100)
-print(SNR_average1000)
-
-# plt.figure(figsize=(25,15))
-# plt.subplot(2,2,1)
-# plt.plot(t, averageA_RN10)
-# plt.xlabel("Tiempo")
-# plt.ylabel("Amplitud Normalizada")
-# plt.xlim(0, 16/f0)
-
-
-# plt.subplot(2,2,2)
-# plt.plot(t, averageA_RN100)
-# plt.xlabel("Tiempo")
-# plt.ylabel("Amplitud Normalizada")
-# plt.xlim(0, 16/f0)
-
-
-# plt.subplot(2,2,3)
-# plt.plot(t, averageA_RN1000)
-# plt.xlabel("Tiempo")
-# plt.ylabel("Amplitud Normalizada")
-# plt.xlim(0, 16/f0)
-# plt.show()
-
-# Creo los arrays de datos para la tabla
-Average_SNR_List = np.array([("10", "100", "1000"), (averageA_RN10, averageA_RN100, averageA_RN1000), (SNR_average10, SNR_average100, SNR_average1000), (SNR1, SNR2, SNR3)])
-cell_text = Average_SNR_List.transpose()
-colLabels = ['Cantidad de señales de ruido', 'Promedio', 'SNR promedio', 'SNR ejercicio 3']
-
-# Grafico la tabla
 plt.figure(figsize=(25,15))
-fig, ax = plt.subplots()
-fig.patch.set_visible(False)
-ax.axis('off')
-ax.axis('tight')
-plt.table(  cellText=cell_text,
-            colLabels=colLabels,
-            loc='center')
+plt.subplot(2,2,1)
+plt.plot(t, averageA_RN10)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
+plt.xlim(0, 16/f0)
 
-# FALTA: Dar formato a tabla
+
+plt.subplot(2,2,2)
+plt.plot(t, averageA_RN100)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
+plt.xlim(0, 16/f0)
+
+
+plt.subplot(2,2,3)
+plt.plot(t, averageA_RN1000)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
+plt.xlim(0, 16/f0)
+plt.show()
+
+DC_SNR_layout = go.Layout(
+    title='SNR para Promedio Ensamble',
+    margin=go.layout.Margin(
+        autoexpand=True
+    )
+)
+
+fig = go.Figure(data=[go.Table(header=dict(values=['Cantidad de señales de ruido', 'SNR promedio', 'SNR ejercicio 3'],align='center'),
+                cells=dict(values=[["10", "100", "1000"], [SNR_average10, SNR_average100, SNR_average1000], [SNR1, SNR2, SNR3]],align='center'))
+                ],
+                layout=DC_SNR_layout)
+fig.show()
+
 
 # %%
 
@@ -337,6 +369,28 @@ plt.plot(t, filtranding)
 plt.xlim(0, 8/f0)
 plt.ylim(-2,2)
 
+def mediamovildr(x,M):
+    if len(x)<M:
+        raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
+    if len(x)>M:
+        y = np.zeros(len(x))
+        acc=0
+        for i in range(0,M//2):
+            acc += x[i]
+        y[M//2] = acc/M
+        for i in range((M//2)+1,(len(y)-(M//2))):
+            acc = acc + x[i+((M-1)//2)]-x[i-(((M-1)//2)+1)]
+            y[i] = acc/M
+        return (y+0.4708)/np.amax(y+0.4708) # Esta normalización y desplazamiento deberían solucionarse de otra forma.
+    else:
+        s=len(x)-M
+        return np.hstack([np.zeros(M-1),np.mean(x[s:s+M-1])])
+
+xfr = mediamovildr(A,10)
+print(np.amin(xfr))
+plt.figure(2)
+plt.plot(t, xfr)
+plt.xlim(0, 8/f0)
 
 
 #%%
@@ -428,3 +482,4 @@ plt.show()
 sf.write('Conv.wav',conv,fs)
 sf.write('Conv circular.wav',conv_circ,fs)
 sf.write('Circular (igual lineal).wav',circ_lin,fs)
+
