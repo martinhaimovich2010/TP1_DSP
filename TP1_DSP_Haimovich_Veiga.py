@@ -374,14 +374,14 @@ def mediamovildr(x,M):
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     if len(x)>M:
         y = np.zeros(len(x))
-        acc=0
+        acc=0.0
         for i in range(0,M//2):
             acc += x[i]
         y[M//2] = acc/M
         for i in range((M//2)+1,(len(y)-(M//2))):
             acc = acc + x[i+((M-1)//2)]-x[i-(((M-1)//2)+1)]
             y[i] = acc/M
-        return (y+0.4708)/np.amax(y+0.4708) # Esta normalización y desplazamiento deberían solucionarse de otra forma.
+        return (y-np.mean(y))/np.amax(y-np.mean(y)) # Esta normalización y desplazamiento deberían solucionarse de otra forma.
     else:
         s=len(x)-M
         return np.hstack([np.zeros(M-1),np.mean(x[s:s+M-1])])
