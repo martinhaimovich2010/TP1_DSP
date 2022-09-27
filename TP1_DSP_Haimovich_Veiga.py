@@ -394,6 +394,36 @@ plt.xlim(0, 8/f0)
 
 
 #%%
+#Ejercicio 6
+
+M = 22000
+
+w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
+#Hago la convolucion entre la ventana y la señal
+h = np.convolve(A, w, mode='full')
+h = h / np.amax(h)
+
+#Grafico la señal filtrada del ejercicio 5
+plt.subplot(1,2,2)
+filtranding = mediaMovilD(A, 1000)
+# filtranding = mediaMovilD(A, 1000)
+plt.plot(t, y)
+plt.xlim(0, 8/f0)
+plt.ylim(-1,1)
+    
+plt.figure(1)
+
+#Grafico la convolucion entre w y la señal del ejercicio 1
+plt.subplot(1,2,1)
+plt.plot(t, h)
+plt.xlim(0, 8/f0)
+plt.ylim(-1,1)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud")
+
+plt.show()
+
+#%%
 
 #Ejercicio 7
 
@@ -407,14 +437,16 @@ for i in range(M):
     blackMan[i] = a0 - a1 * np.cos((2*np.pi*i)/(M-1)) + a2 * np.cos((4*np.pi*i)/(M-1)) 
 
 #Convoluciono el filtro black man con la señal del ejercicio 1
-convBlack = np.convolve(A, blackMan, mode='same')
+convBlack = np.convolve(A, blackMan, mode='full')
 #normalizo
 convBlack = convBlack / np.amax(convBlack)
+
+t = np.linspace(0, 2, len(convBlack))
 
 #Grafico
 plt.figure(1)
 plt.plot(t, convBlack)
-plt.xlim(0, 8/f0)
+plt.xlim(0.0031, 8/f0)
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
 plt.show()
@@ -434,7 +466,7 @@ h, fs = sf.read('Resp_Imp.wav')
 from conv_circular import circular_convolve, _periodic_summation
 
 #Convolucion lineal
-conv = np.convolve(A, h)
+conv = np.convolve(A, h, mode='full')
 conv = conv / np.amax(conv)
 
 #Convolucion circular
@@ -456,24 +488,27 @@ circ_lin = circ_lin / np.amax(circ_lin)
 #Grafico las señales convolucionadas
 
 #Genero vectores de tiempo para cada señal a graficar
-t1 = np.linspace(0,8/f0,len(conv))
-t2 = np.linspace(0,8/f0,len(conv_circ))
-t3 = np.linspace(0,8/f0,len(circ_lin))
+t1 = np.linspace(0,2,len(conv))
+t2 = np.linspace(0,2,len(conv_circ))
+t3 = np.linspace(0,2,len(circ_lin))
 
 #Grafico convolucion lineal
 plt.figure(figsize=(25,15))
 plt.subplot(2,2,1)
 plt.plot(t1, conv)
+plt.xlim(0, 0.1)
 plt.title("Convolucion lineal")
 
 #Grafico convolucion circular
 plt.subplot(2,2,2)
 plt.plot(t2, conv_circ)
+plt.xlim(0, 0.1)
 plt.title("Convolucion circular")
 
 #Grafico convolucion circular de misma longitud que la lineal
 plt.subplot(2,2,3)
 plt.plot(t3, circ_lin)
+plt.xlim(0, 0.1)
 plt.title("Conv circular (misma long que conv lineal)")
 
 plt.show()
