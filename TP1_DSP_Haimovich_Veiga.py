@@ -407,7 +407,7 @@ h = h / np.amax(h)
 plt.subplot(1,2,2)
 filtranding = mediaMovilD(A, 1000)
 # filtranding = mediaMovilD(A, 1000)
-plt.plot(t, y)
+plt.plot(t, filtranding)
 plt.xlim(0, 8/f0)
 plt.ylim(-1,1)
     
@@ -415,7 +415,7 @@ plt.figure(1)
 
 #Grafico la convolucion entre w y la señal del ejercicio 1
 plt.subplot(1,2,1)
-plt.plot(t, h)
+plt.plot(t, h[0:len(t)])
 plt.xlim(0, 8/f0)
 plt.ylim(-1,1)
 plt.xlabel("Tiempo")
@@ -518,3 +518,5 @@ sf.write('Conv.wav',conv,fs)
 sf.write('Conv circular.wav',conv_circ,fs)
 sf.write('Circular (igual lineal).wav',circ_lin,fs)
 
+
+# %%
