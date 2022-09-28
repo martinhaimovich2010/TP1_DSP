@@ -605,7 +605,124 @@ def spectralRolloff():
 
 #Ejercicio 11
 
+#Ejercicio 11
 
+#Genero las ventanas
+M = 1000
+w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
+hann = 0.5 - 0.5 * np.cos((2*np.pi*t)/M)
+blackMan = 0.42 - 0.5 * np.cos((2*np.pi*t)/(M-1)) + 0.08 * np.cos((4*np.pi*t)/(M-1)) 
+
+#Multiplico las señales por la ventana rectangular
+A_w = A * w
+AX1_w = AX1 * w
+AX2_w = AX2 * w
+AX3_w = AX3 * w
+
+#Multiplico las señales por la ventana de Hann
+A_h = A * hann
+AX1_h = AX1 * hann
+AX2_h = AX2 * hann
+AX3_h = AX3 * hann
+
+#Multiplico las señales por la ventana de Blackman
+A_b = A * blackMan
+AX1_b = AX1 * blackMan
+AX2_b = AX2 * blackMan
+AX3_b = AX3 * blackMan
+
+#Hago la DFT de las señales multiplicadas por la ventana rectangular
+A_w_dft = np.fft.rfft(A_w)
+AX1_w_dft = np.fft.rfft(AX1_w)
+AX2_w_dft = np.fft.rfft(AX2_w)
+AX3_w_dft = np.fft.rfft(AX3_w)
+#Normalizo
+A_w_dft = A_w_dft / np.amax(A_w_dft)
+AX1_w_dft = AX1_w_dft / np.amax(AX1_w_dft)
+AX2_w_dft = AX2_w_dft / np.amax(AX2_w_dft)
+AX3_w_dft = AX3_w_dft / np.amax(AX3_w_dft)
+
+#Hago la DFT de las señales multiplicadas por la ventana de Hann
+A_h_dft = np.fft.rfft(A_h)
+AX1_h_dft = np.fft.rfft(AX1_h)
+AX2_h_dft = np.fft.rfft(AX2_h)
+AX3_h_dft = np.fft.rfft(AX3_h)
+#Normalizo
+A_h_dft = A_h_dft / np.amax(A_h_dft)
+AX1_h_dft = AX1_h_dft / np.amax(AX1_h_dft)
+AX2_h_dft = AX2_h_dft / np.amax(AX2_h_dft)
+AX3_h_dft = AX3_h_dft / np.amax(AX3_h_dft)
+
+#Hago la DFT de las señales multiplicadas por la ventana de Blackman
+A_b_dft = np.fft.rfft(A_b)
+AX1_b_dft = np.fft.rfft(AX1_b)
+AX2_b_dft = np.fft.rfft(AX2_b)
+AX3_b_dft = np.fft.rfft(AX3_b)
+#Normalizo
+A_b_dft = A_b_dft / np.amax(A_b_dft)
+AX1_b_dft = AX1_b_dft / np.amax(AX1_b_dft)
+AX2_b_dft = AX2_b_dft / np.amax(AX2_b_dft)
+AX3_b_dft = AX3_b_dft / np.amax(AX3_b_dft)
+
+#Creo vector de frecuencias para graficar las DFTs
+f = np.arange(0, fs//2, (fs//2)/len(A_w_dft)) #Podria haber dividido a la mitad de fs por la longitud de cualquiera de las transformadas
+
+#Grafico todo
+plt.figure(figsize=(25,15))
+#Grafico las transformadas de la señal limpia
+plt.subplot(4,3,1)
+plt.plot(f, abs(A_w_dft))
+plt.title("DFT señal limpia con triangular")
+
+plt.subplot(4,3,2)
+plt.plot(f, abs(A_h_dft))
+plt.title("DFT señal limpia con Hann")
+
+plt.subplot(4,3,3)
+plt.plot(f, abs(A_b_dft))
+plt.title("DFT señal limpia con Blackman")
+
+
+#Grafico las transformadas de la primer señal con ruido
+plt.subplot(4,3,4)
+plt.plot(f, abs(AX1_w_dft))
+plt.title("DFT señal ruidosa 1 con triangular")
+
+plt.subplot(4,3,5)
+plt.plot(f, abs(AX1_h_dft))
+plt.title("DFT señal ruidosa 1 con Hann")
+
+plt.subplot(4,3,6)
+plt.plot(f, abs(AX1_b_dft))
+plt.title("DFT señal ruidosa 1 con Blackman")
+
+
+#Grafico las transformadas de la segunda señal con ruido
+plt.subplot(4,3,7)
+plt.plot(f, abs(AX2_w_dft))
+plt.title("DFT señal ruidosa 2 con triangular")
+
+plt.subplot(4,3,8)
+plt.plot(f, abs(AX2_h_dft))
+plt.title("DFT señal ruidosa 2 con Hann")
+
+plt.subplot(4,3,9)
+plt.plot(f, abs(AX2_b_dft))
+plt.title("DFT señal ruidosa 2 con Blackman")
+
+
+#Grafico las transformadas de la tercer señal con ruido
+plt.subplot(4,3,10)
+plt.plot(f, abs(AX3_w_dft))
+plt.title("DFT señal ruidosa 3 con triangular")
+
+plt.subplot(4,3,11)
+plt.plot(f, abs(AX3_h_dft))
+plt.title("DFT señal ruidosa 3 con Hann")
+
+plt.subplot(4,3,12)
+plt.plot(f, abs(AX3_b_dft))
+plt.title("DFT señal ruidosa 3 con Blackman")
 
 # %%
 
