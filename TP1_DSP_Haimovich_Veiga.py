@@ -542,7 +542,7 @@ def shortTimeEnergy(M,x):
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     ste = np.zeros(len(x)-M+1)
     for i in range(0,len(x)-M):
-        for j in range(i,i+M):
+        for j in range(i,i+M-1):
             ste[i] += ( ((x[j])**2) / M )   
     return ste
 
@@ -551,7 +551,7 @@ def zeroCrossingRate(M,x):
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     zcr = np.zeros(len(x)-M+1)
     for i in range(0,len(x)-M):
-        for j in range(i,i+M):
+        for j in range(i,i+M-1):
             zcr[i] += ( ( (sgn(x[j])) - (sgn(x[j-1])) ) / (2*M) )    
     return zcr
 
@@ -562,7 +562,7 @@ def energyEntropy(M,x,K):
         raise Exception('La ventana K no debe tener más muestras que la ventana M')
     enen = np.zeros(len(x)-M+1)
     for i in range(0,len(x)-M):
-        for j in range(i,i+M):
+        for j in range(i,i+M-1):
             ej = ( (x[j]**2) / (K) ) / ( np.sum(shortTimeEnergy(K, x[i:i+K])) ) #Repensar esta cuenta para reducir runtime.
             enen[i] += (-1) * ej * np.log2(ej)  
     return enen
@@ -586,6 +586,7 @@ ZCR3 = zeroCrossingRate(1000, signal3)
 # ENEN2 = energyEntropy(1000, signal2, 500)
 # ENEN3 = energyEntropy(1000, signal3, 500)
 
+# FALTA: Solucionar EnEn y graficar resultados.
 
 # %%
 
