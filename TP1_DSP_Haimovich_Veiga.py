@@ -391,6 +391,7 @@ print(np.amin(xfr))
 plt.figure(2)
 plt.plot(t, xfr)
 plt.xlim(0, 8/f0)
+plt.ylim(-2,2)
 
 
 #%%
@@ -441,11 +442,13 @@ convBlack = np.convolve(A, blackMan, mode='full')
 #normalizo
 convBlack = convBlack / np.amax(convBlack)
 
-t = np.linspace(0, 2, len(convBlack))
+#Defino muestras iniciales y finales para graficar la señal filtrada quitando las muestras agregadas por la convolución en los extremos.
+convBlackStart = ( (len(convBlack)-len(t)) // 2 )
+convBlackEnd = ( (len(convBlack)+len(t)) // 2 )
 
 #Grafico
 plt.figure(1)
-plt.plot(t, convBlack)
+plt.plot(t, convBlack[0:len(t)])
 plt.xlim(0.0031, 8/f0)
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
@@ -520,3 +523,97 @@ sf.write('Circular (igual lineal).wav',circ_lin,fs)
 
 
 # %%
+
+#Ejercicio 9
+
+# Defino función signo con sgn(0)=1 , como se describe en la referencia.
+def sgn(t):
+    if t<0:
+        return -1
+    elif t>=0:
+        return 1
+    else:
+        raise Exception('Invalid input. Input must be an integer or float.')
+
+# Defino las funciones genéricamente.
+
+def shortTimeEnergy(M,x):
+    if len(x)<M:
+        raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
+    ste = np.zeros(len(x)-M+1)
+    for i in range(0,len(x)-M):
+        for j in range(i,i+M):
+            ste[i] += ( ((x[j])**2) / M )   
+    return ste
+
+def zeroCrossingRate(M,x):
+    if len(x)<M:
+        raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
+    zcr = np.zeros(len(x)-M+1)
+    for i in range(0,len(x)-M):
+        for j in range(i,i+M):
+            zcr[i] += ( ( (sgn(x[j])) - (sgn(x[j-1])) ) / (2*M) )    
+    return zcr
+
+def energyEntropy(M,x,K):
+    if len(x)<M:
+        raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
+    if M<K:
+        raise Exception('La ventana K no debe tener más muestras que la ventana M')
+    enen = np.zeros(len(x)-M+1)
+    for i in range(0,len(x)-M):
+        for j in range(i,i+M):
+            ej = ( (x[j]**2) / (K) ) / ( np.sum(shortTimeEnergy(K, x[i:i+K])) ) #Repensar esta cuenta para reducir runtime.
+            enen[i] += (-1) * ej * np.log2(ej)  
+    return enen
+
+# Importo las señales.
+signal1, fs = sf.read('Sen_al1.wav')
+signal2, fs = sf.read('Sen_al1.wav')
+signal3, fs = sf.read('Sen_al1.wav')
+
+# Calculo los parámetros temporales de las señales y grafico.
+STE1 = shortTimeEnergy(1000, signal1)
+STE2 = shortTimeEnergy(1000, signal2)
+STE3 = shortTimeEnergy(1000, signal3)
+
+ZCR1 = zeroCrossingRate(1000, signal1)
+ZCR2 = zeroCrossingRate(1000, signal2)
+ZCR3 = zeroCrossingRate(1000, signal3)
+
+# ENEN not working yet.
+# ENEN1 = energyEntropy(1000, signal1, 500)
+# ENEN2 = energyEntropy(1000, signal2, 500)
+# ENEN3 = energyEntropy(1000, signal3, 500)
+
+
+# %%
+
+#Ejercicio 10
+
+def spectralCentroid():
+    return
+
+def spectralFlux():
+    return
+
+def spectralRolloff():
+    return
+
+# %%
+
+#Ejercicio 11
+
+
+
+# %%
+
+#Ejercicio 12
+
+
+
+# %%
+
+#Ejercicio 13
+
+
