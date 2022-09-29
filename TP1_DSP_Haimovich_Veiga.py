@@ -525,27 +525,34 @@ def shortTimeEnergy(M,x,hop):
                 ste[j+(i*hop)] += ( ((y)**2) / M )   
     return ste
 
-def zeroCrossingRate(M,x):
+def zeroCrossingRate(M,x,hop):
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     zcr = np.zeros(len(x)-M+1)
     w = np.hamming(M)
-    for i in range(1,len(x)-M):
-        for j in range(i,i+M-1):
-            y = x[j] * w[j-i]
-            zcr[i] += ( ( (sgn(y)) - (sgn(x[j-1]*w[j-i])) ) / (2*M) )    
+    for i in range(0,((len(x)-M)//hop)):
+        for j in range(0,M-1):
+            if (j+(i*hop)) < (len(x)-M+1):
+                y = x[j+(i*hop)] * w[j]
+                zcr[j+(i*hop)] += ( ( (sgn(y)) - (sgn(x[j+(i*hop)-1]*w[j])) ) / (2*M) )    
     return zcr
 
-def energyEntropy(M,x,K):
+# Revisar!
+def energyEntropy(M,x,K,hop):
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     if M<K:
         raise Exception('La ventana K no debe tener más muestras que la ventana M')
     enen = np.zeros(len(x)-M+1)
-    for i in range(0,len(x)-M):
-        for j in range(i,i+M-1):
-            ej = ( (x[j]**2) / (K) ) / ( np.sum(shortTimeEnergy(K, x[i:i+K])) ) #Repensar esta cuenta para reducir runtime.
-            enen[i] += (-1) * ej * np.log2(ej)  
+    w = np.hamming(M)
+    for i in range(0,((len(x)-M)//hop)):
+        for j in range(0,M-1):
+            if (j+(i*hop)) < (len(x)-M+1):
+                y = x[j+(i*hop)] * w[j]
+                eTotSF = ( np.sum(shortTimeEnergy(K, x[(i*hop):(i*hop)+K], hop//(M//K))) )
+                if eTotSF > 0:
+                    ej = ( (y**2) / (K) ) / eTotSF
+                    enen[j+(i*hop)] += (-1) * ej * np.log2(ej)  
     return enen
 
 # Importo las señales.
@@ -560,23 +567,41 @@ STE3 = shortTimeEnergy(1000, signal3, 500)
 
 plt.figure(figsize=(25,15))
 plt.subplot(1,3,1)
-plt.plot(np.arange(len(STE1)), np.array(STE1))
+plt.plot(np.linspace(0,len(STE1)/fs,len(STE1)), np.array(STE1))
 plt.subplot(1,3,2)
-plt.plot(np.arange(len(STE2)), np.array(STE2))
+plt.plot(np.linspace(0,len(STE2)/fs,len(STE2)), np.array(STE2))
 plt.subplot(1,3,3)
-plt.plot(np.arange(len(STE3)), np.array(STE3))
+plt.plot(np.linspace(0,len(STE3)/fs,len(STE3)), np.array(STE3))
 plt.show()
 
-# ZCR1 = zeroCrossingRate(1000, signal1)
-# ZCR2 = zeroCrossingRate(1000, signal2)
-# ZCR3 = zeroCrossingRate(1000, signal3)
+ZCR1 = zeroCrossingRate(1000, signal1, 500)
+ZCR2 = zeroCrossingRate(1000, signal2, 500)
+ZCR3 = zeroCrossingRate(1000, signal3, 500)
+
+plt.figure(figsize=(25,15))
+plt.subplot(1,3,1)
+plt.plot(np.linspace(0,len(ZCR1)/fs,len(ZCR1)), np.array(ZCR1))
+plt.subplot(1,3,2)
+plt.plot(np.linspace(0,len(ZCR2)/fs,len(ZCR2)), np.array(ZCR2))
+plt.subplot(1,3,3)
+plt.plot(np.linspace(0,len(ZCR3)/fs,len(ZCR3)), np.array(ZCR3))
+plt.show()
 
 # ENEN not working yet.
-# ENEN1 = energyEntropy(1000, signal1, 500)
-# ENEN2 = energyEntropy(1000, signal2, 500)
-# ENEN3 = energyEntropy(1000, signal3, 500)
+ENEN1 = energyEntropy(1000, signal1, 200, 500)
+ENEN2 = energyEntropy(1000, signal2, 200, 500)
+ENEN3 = energyEntropy(1000, signal3, 200, 500)
 
-# FALTA: Aplicar ventana de Hamming, solucionar EnEn y graficar resultados.
+plt.figure(figsize=(25,15))
+plt.subplot(1,3,1)
+plt.plot(np.linspace(0,len(ENEN1)/fs,len(ENEN1)), np.array(ENEN1))
+plt.subplot(1,3,2)
+plt.plot(np.linspace(0,len(ENEN2)/fs,len(ENEN2)), np.array(ENEN2))
+plt.subplot(1,3,3)
+plt.plot(np.linspace(0,len(ENEN3)/fs,len(ENEN3)), np.array(ENEN3))
+plt.show()
+
+# FALTA: Solucionar EnEn.
 
 # %%
 
