@@ -100,22 +100,7 @@ for i in arrayTabla:
     dsArray.append(ds)
     errorArray.append(error)
 
-# Creo los arrays de datos para la tabla
-# sdErrorList = np.array([np.array(arrayTabla).astype(str), np.around(dsArray, 2), np.around(errorArray,2)])
-# cell_text = sdErrorList.transpose()
-# colLabels = ['L', 'Sigma', 'Error %']
-
-# # Grafico la tabla
-# plt.figure(figsize=(25,15))
-# fig, ax = plt.subplots()
-# fig.patch.set_visible(False)
-# ax.axis('off')
-# ax.axis('tight')
-# plt.table(  cellText=cell_text,
-#             colLabels=colLabels,
-#             loc='center')
-# plt.show()
-
+# Grafico en tabla
 DC_SNR_layout = go.Layout(
     title='Desviación Estándar y Error según longitud de señal',
     margin=go.layout.Margin(
@@ -191,8 +176,7 @@ SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
 SNR3 = Señal_Ruido(AX3,sigma3,fs/f0)
 
 #Agregandole a cada señal un componente de continua
-# C = int(input("Definir un valor para la componente de continua: "))
-DCcomps = [-1000, -10, 10, 1000]
+DCcomps = [-10, 10, 1000]
 
 #Sumando el componente de continua a cada señal
 AX1_C1 = AX1 + DCcomps[0]
@@ -207,10 +191,6 @@ AX1_C3 = AX1 + DCcomps[2]
 AX2_C3 = AX2 + DCcomps[2]
 AX3_C3 = AX3 + DCcomps[2]
 
-AX1_C4 = AX1 + DCcomps[3]
-AX2_C4 = AX2 + DCcomps[3]
-AX3_C4 = AX3 + DCcomps[3]
-
 #Calculando SNR a cada señal con componente de continua
 SNR4 = Señal_Ruido(AX1_C1,sigma1,fs/f0)
 SNR5 = Señal_Ruido(AX2_C1,sigma2,fs/f0)
@@ -224,10 +204,6 @@ SNR10 = Señal_Ruido(AX1_C3,sigma1,fs/f0)
 SNR11 = Señal_Ruido(AX2_C3,sigma2,fs/f0)
 SNR12 = Señal_Ruido(AX3_C3,sigma3,fs/f0)
 
-SNR13 = Señal_Ruido(AX1_C4,sigma1,fs/f0)
-SNR14 = Señal_Ruido(AX2_C4,sigma2,fs/f0)
-SNR15 = Señal_Ruido(AX3_C4,sigma3,fs/f0)
-
 # Creo los arrays de datos para la tabla
 sdErrorList = np.array([("Señal 1", "Señal 2", "Señal 3"), (sigma1, sigma2, sigma3) , (SNR1, SNR2, SNR3), (SNR4, SNR5, SNR6), (SNR7, SNR8, SNR9), (SNR10, SNR11, SNR12), (SNR13, SNR14, SNR15)])
 cell_text = sdErrorList.transpose()
@@ -240,8 +216,8 @@ DC_SNR_layout = go.Layout(
     )
 )
 
-fig = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Sigma', 'SNR', 'SNR con DC=-1000', 'SNR con DC=-10', 'SNR con DC=10', 'SNR con DC=1000'],align='center'),
-                cells=dict(values=[["Señal 1", "Señal 2", "Señal 3"], [sigma1, sigma2, sigma3] , [SNR1, SNR2, SNR3], [SNR4, SNR5, SNR6], [SNR7, SNR8, SNR9], [SNR10, SNR11, SNR12], [SNR13, SNR14, SNR15]],align='center'))
+fig = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Sigma', 'SNR', 'SNR con DC=-10', 'SNR con DC=10', 'SNR con DC=1000'],align='center'),
+                cells=dict(values=[["Señal 1", "Señal 2", "Señal 3"], [sigma1, sigma2, sigma3] , [SNR1, SNR2, SNR3], [SNR4, SNR5, SNR6], [SNR7, SNR8, SNR9], [SNR10, SNR11, SNR12]],align='center'))
                 ],
                 layout=DC_SNR_layout)
 fig.show()
@@ -537,22 +513,27 @@ def sgn(t):
 
 # Defino las funciones genéricamente.
 
-def shortTimeEnergy(M,x):
+def shortTimeEnergy(M,x,hop):
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     ste = np.zeros(len(x)-M+1)
-    for i in range(0,len(x)-M):
-        for j in range(i,i+M-1):
-            ste[i] += ( ((x[j])**2) / M )   
+    w = np.hamming(M)
+    for i in range(0,((len(x)-M)//hop)):
+        for j in range(0,M-1):
+            if (j+(i*hop)) < (len(x)-M+1):
+                y = x[j+(i*hop)] * w[j]
+                ste[j+(i*hop)] += ( ((y)**2) / M )   
     return ste
 
 def zeroCrossingRate(M,x):
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     zcr = np.zeros(len(x)-M+1)
-    for i in range(0,len(x)-M):
+    w = np.hamming(M)
+    for i in range(1,len(x)-M):
         for j in range(i,i+M-1):
-            zcr[i] += ( ( (sgn(x[j])) - (sgn(x[j-1])) ) / (2*M) )    
+            y = x[j] * w[j-i]
+            zcr[i] += ( ( (sgn(y)) - (sgn(x[j-1]*w[j-i])) ) / (2*M) )    
     return zcr
 
 def energyEntropy(M,x,K):
@@ -569,24 +550,33 @@ def energyEntropy(M,x,K):
 
 # Importo las señales.
 signal1, fs = sf.read('Sen_al1.wav')
-signal2, fs = sf.read('Sen_al1.wav')
-signal3, fs = sf.read('Sen_al1.wav')
+signal2, fs = sf.read('Sen_al2.wav')
+signal3, fs = sf.read('Sen_al3.wav')
 
 # Calculo los parámetros temporales de las señales y grafico.
-STE1 = shortTimeEnergy(1000, signal1)
-STE2 = shortTimeEnergy(1000, signal2)
-STE3 = shortTimeEnergy(1000, signal3)
+STE1 = shortTimeEnergy(1000, signal1, 500)
+STE2 = shortTimeEnergy(1000, signal2, 500)
+STE3 = shortTimeEnergy(1000, signal3, 500)
 
-ZCR1 = zeroCrossingRate(1000, signal1)
-ZCR2 = zeroCrossingRate(1000, signal2)
-ZCR3 = zeroCrossingRate(1000, signal3)
+plt.figure(figsize=(25,15))
+plt.subplot(1,3,1)
+plt.plot(np.arange(len(STE1)), np.array(STE1))
+plt.subplot(1,3,2)
+plt.plot(np.arange(len(STE2)), np.array(STE2))
+plt.subplot(1,3,3)
+plt.plot(np.arange(len(STE3)), np.array(STE3))
+plt.show()
+
+# ZCR1 = zeroCrossingRate(1000, signal1)
+# ZCR2 = zeroCrossingRate(1000, signal2)
+# ZCR3 = zeroCrossingRate(1000, signal3)
 
 # ENEN not working yet.
 # ENEN1 = energyEntropy(1000, signal1, 500)
 # ENEN2 = energyEntropy(1000, signal2, 500)
 # ENEN3 = energyEntropy(1000, signal3, 500)
 
-# FALTA: Solucionar EnEn y graficar resultados.
+# FALTA: Aplicar ventana de Hamming, solucionar EnEn y graficar resultados.
 
 # %%
 
