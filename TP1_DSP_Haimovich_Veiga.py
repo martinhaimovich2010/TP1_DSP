@@ -204,11 +204,6 @@ SNR10 = Señal_Ruido(AX1_C3,sigma1,fs/f0)
 SNR11 = Señal_Ruido(AX2_C3,sigma2,fs/f0)
 SNR12 = Señal_Ruido(AX3_C3,sigma3,fs/f0)
 
-# Creo los arrays de datos para la tabla
-sdErrorList = np.array([("Señal 1", "Señal 2", "Señal 3"), (sigma1, sigma2, sigma3) , (SNR1, SNR2, SNR3), (SNR4, SNR5, SNR6), (SNR7, SNR8, SNR9), (SNR10, SNR11, SNR12), (SNR13, SNR14, SNR15)])
-cell_text = sdErrorList.transpose()
-colLabels = ['Señal con ruido', 'Sigma', 'SNR', 'SNR con continua 1', 'SNR con continua 2', 'SNR con continua 3', 'SNR con continua 4']
-
 DC_SNR_layout = go.Layout(
     title='Relaciones Señal-Ruido para distintas desviaciones estándar',
     margin=go.layout.Margin(
@@ -487,45 +482,51 @@ def sgn(t):
 # Defino las funciones genéricamente.
 
 def shortTimeEnergy(M,x,hop):
+    if len(x) < (hop-M):
+        raise Exception('El salto entre frames no debe tener más muestras que la señal a filtrar menos la ventana de cada frame')
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
-    ste = np.zeros(len(x)-M+1)
+    ste = np.zeros((len(x)-M)//hop)
     w = np.hamming(M)
     for i in range(0,((len(x)-M)//hop)):
-        for j in range(0,M-1):
-            if (j+(i*hop)) < (len(x)-M+1):
+        for j in range(0,M):
+            if (j+(i*hop)) < ((len(x)-M+1)):
                 y = x[j+(i*hop)] * w[j]
-                ste[j+(i*hop)] += ( ((y)**2) / M )   
+                ste[i] += ( ((y)**2) / M )   
     return ste
 
 def zeroCrossingRate(M,x,hop):
+    if len(x) < (hop-M):
+        raise Exception('El salto entre frames no debe tener más muestras que la señal a filtrar menos la ventana de cada frame')    
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
-    zcr = np.zeros(len(x)-M+1)
+    zcr = np.zeros((len(x)-M)//hop)
     w = np.hamming(M)
     for i in range(0,((len(x)-M)//hop)):
-        for j in range(0,M-1):
+        for j in range(1,M):
             if (j+(i*hop)) < (len(x)-M+1):
                 y = x[j+(i*hop)] * w[j]
-                zcr[j+(i*hop)] += ( ( (sgn(y)) - (sgn(x[j+(i*hop)-1]*w[j])) ) / (2*M) )    
+                zcr[i] += np.abs( ( (sgn(y)) - (sgn(x[j+(i*hop)-1]*w[j-1])) ) / (2*M) )    
     return zcr
 
-# Revisar!
 def energyEntropy(M,x,K,hop):
+    if len(x) < (hop-M):
+        raise Exception('El salto entre frames no debe tener más muestras que la señal a filtrar menos la ventana de cada frame')
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     if M<K:
         raise Exception('La ventana K no debe tener más muestras que la ventana M')
-    enen = np.zeros(len(x)-M+1)
+    enen = np.zeros((len(x)-M)//hop)
     w = np.hamming(M)
     for i in range(0,((len(x)-M)//hop)):
-        for j in range(0,M-1):
-            if (j+(i*hop)) < (len(x)-M+1):
-                y = x[j+(i*hop)] * w[j]
-                eTotSF = ( np.sum(shortTimeEnergy(K, x[(i*hop):(i*hop)+K], hop//(M//K))) )
-                if eTotSF > 0:
-                    ej = ( (y**2) / (K) ) / eTotSF
-                    enen[j+(i*hop)] += (-1) * ej * np.log2(ej)  
+        eTotSF = ( np.sum(shortTimeEnergy(K, x[(i*hop):(i*hop)+M], hop//(M//K))) )
+        for j in range(0,M-K):
+            if (j+(i*hop)+K) < (len(x)-M+1):
+                y = np.multiply(x[j+(i*hop):j+(i*hop)+K], w[j:j+K])
+                if np.abs(eTotSF) > 0:
+                    ej = np.sum( np.multiply(y,y) / (K) ) / eTotSF
+                    if np.abs(ej) > 0:
+                        enen[(i)] += (-1) * ej * np.log2(ej)  
     return enen
 
 # Importo las señales.
@@ -540,11 +541,11 @@ STE3 = shortTimeEnergy(1000, signal3, 500)
 
 plt.figure(figsize=(25,15))
 plt.subplot(1,3,1)
-plt.plot(np.linspace(0,len(STE1)/fs,len(STE1)), np.array(STE1))
+plt.plot(np.linspace(0,len(signal1)/fs,len(STE1)), np.array(STE1))
 plt.subplot(1,3,2)
-plt.plot(np.linspace(0,len(STE2)/fs,len(STE2)), np.array(STE2))
+plt.plot(np.linspace(0,len(signal2)/fs,len(STE2)), np.array(STE2))
 plt.subplot(1,3,3)
-plt.plot(np.linspace(0,len(STE3)/fs,len(STE3)), np.array(STE3))
+plt.plot(np.linspace(0,len(signal3)/fs,len(STE3)), np.array(STE3))
 plt.show()
 
 ZCR1 = zeroCrossingRate(1000, signal1, 500)
@@ -553,45 +554,133 @@ ZCR3 = zeroCrossingRate(1000, signal3, 500)
 
 plt.figure(figsize=(25,15))
 plt.subplot(1,3,1)
-plt.plot(np.linspace(0,len(ZCR1)/fs,len(ZCR1)), np.array(ZCR1))
+plt.plot(np.linspace(0,len(signal1)/fs,len(ZCR1)), np.array(ZCR1))
 plt.subplot(1,3,2)
-plt.plot(np.linspace(0,len(ZCR2)/fs,len(ZCR2)), np.array(ZCR2))
+plt.plot(np.linspace(0,len(signal2)/fs,len(ZCR2)), np.array(ZCR2))
 plt.subplot(1,3,3)
-plt.plot(np.linspace(0,len(ZCR3)/fs,len(ZCR3)), np.array(ZCR3))
+plt.plot(np.linspace(0,len(signal3)/fs,len(ZCR3)), np.array(ZCR3))
 plt.show()
 
-# ENEN not working yet.
 ENEN1 = energyEntropy(1000, signal1, 200, 500)
 ENEN2 = energyEntropy(1000, signal2, 200, 500)
 ENEN3 = energyEntropy(1000, signal3, 200, 500)
 
 plt.figure(figsize=(25,15))
+plt.title('Entropía de Energía')
 plt.subplot(1,3,1)
-plt.plot(np.linspace(0,len(ENEN1)/fs,len(ENEN1)), np.array(ENEN1))
+plt.plot(np.linspace(0,len(signal1)/fs,len(ENEN1)), np.array(ENEN1))
 plt.subplot(1,3,2)
-plt.plot(np.linspace(0,len(ENEN2)/fs,len(ENEN2)), np.array(ENEN2))
+plt.plot(np.linspace(0,len(signal2)/fs,len(ENEN2)), np.array(ENEN2))
 plt.subplot(1,3,3)
-plt.plot(np.linspace(0,len(ENEN3)/fs,len(ENEN3)), np.array(ENEN3))
+plt.plot(np.linspace(0,len(signal3)/fs,len(ENEN3)), np.array(ENEN3))
 plt.show()
-
-# FALTA: Solucionar EnEn.
 
 # %%
 
 #Ejercicio 10
 
-def spectralCentroid():
-    return
+def spectralCentroid(M,x,hop):
+    if len(x) < (hop-M):
+        raise Exception('El salto entre frames no debe tener más muestras que la señal a filtrar menos la ventana de cada frame')
+    if len(x)<M:
+        raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
+    spectCen = np.zeros((len(x)-M)//hop)
+    w = np.hamming(M)
+    for i in range(0,((len(x)-M)//hop)):
+        y = np.multiply(x[(i*hop):(i*hop)+M],w)
+        X = np.abs(np.fft.rfft(y))
+        Xsum = np.sum(X)
+        jXsum = 0
+        for j in range(len(X)):
+            jXsum += (j)*X[j]
+        spectCen[i] += jXsum/Xsum       
+    return spectCen  
 
-def spectralFlux():
-    return
+def spectralFlux(M,x,hop):
+    if len(x) < (hop-M):
+        raise Exception('El salto entre frames no debe tener más muestras que la señal a filtrar menos la ventana de cada frame')
+    if len(x)<M:
+        raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
+    spectFlux = np.zeros((len(x)-M)//hop)
+    w = np.hamming(M)
+    for i in range(0,((len(x)-M)//hop)):
+        y = np.multiply(x[(i*hop):(i*hop)+M],w)
+        X = np.abs(np.fft.rfft(y))
+        Xsum = np.sum(X)
+        for j in range(1,len(X)):
+            EN = X[j]/Xsum
+            prevEN = X[j-1]/Xsum
+            spectFlux[i] +=  (EN - prevEN)**2      
+    return spectFlux  
 
-def spectralRolloff():
-    return
+def spectralRolloff(M,x,hop,C):
+    if C>1 or C<0:
+        raise Exception('C debe ser un número entre 0 y 1')
+    if len(x) < (hop-M):
+        raise Exception('El salto entre frames no debe tener más muestras que la señal a filtrar menos la ventana de cada frame')
+    if len(x)<M:
+        raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
+    spectROff = np.zeros((len(x)-M)//hop)
+    w = np.hamming(M)
+    for i in range(0,((len(x)-M)//hop)):
+        y = np.multiply(x[(i*hop):(i*hop)+M],w)
+        X = np.abs(np.fft.rfft(y))
+        Xfreqs = np.fft.rfftfreq(len(y), d=1./fs)
+        Xsum = np.sum(X)
+        for j in range(1,len(X)):
+            if np.sum(X[1:j]) > (C*Xsum):
+                spectROff[i] = Xfreqs[j]
+                break
+    return spectROff
+
+# Importo las señales.
+signal1, fs = sf.read('Sen_al1.wav')
+signal2, fs = sf.read('Sen_al2.wav')
+signal3, fs = sf.read('Sen_al3.wav')
+
+# Calculo los parámetros frecuenciales de las señales y grafico.
+SC1 = spectralCentroid(1000, signal1, 500)
+SC2 = spectralCentroid(1000, signal2, 500)
+SC3 = spectralCentroid(1000, signal3, 500)
+
+plt.figure(figsize=(25,15))
+plt.subplot(1,3,1)
+plt.plot(np.linspace(0,len(signal1)/fs,len(SC1)), np.array(SC1))
+plt.subplot(1,3,2)
+plt.plot(np.linspace(0,len(signal2)/fs,len(SC2)), np.array(SC2))
+plt.subplot(1,3,3)
+plt.plot(np.linspace(0,len(signal3)/fs,len(SC3)), np.array(SC3))
+plt.show()
+
+SF1 = spectralFlux(1000, signal1, 500)
+SF2 = spectralFlux(1000, signal2, 500)
+SF3 = spectralFlux(1000, signal3, 500)
+
+plt.figure(figsize=(25,15))
+plt.subplot(1,3,1)
+plt.plot(np.linspace(0,len(signal1)/fs,len(SF1)), np.array(SF1))
+plt.subplot(1,3,2)
+plt.plot(np.linspace(0,len(signal2)/fs,len(SF2)), np.array(SF2))
+plt.subplot(1,3,3)
+plt.plot(np.linspace(0,len(signal3)/fs,len(SF3)), np.array(SF3))
+plt.show()
+
+SROff1 = spectralRolloff(1000, signal1, 500, 0.9)
+SROff2 = spectralRolloff(1000, signal2, 500, 0.9)
+SROff3 = spectralRolloff(1000, signal3, 500, 0.9)
+
+plt.figure(figsize=(25,15))
+plt.subplot(1,3,1)
+plt.plot(np.linspace(0,len(signal1)/fs,len(SROff1)), np.array(SROff1))
+plt.subplot(1,3,2)
+plt.plot(np.linspace(0,len(signal2)/fs,len(SROff2)), np.array(SROff2))
+plt.subplot(1,3,3)
+plt.plot(np.linspace(0,len(signal3)/fs,len(SROff3)), np.array(SROff3))
+plt.show()
+
+# Falta: Solucionar ejes de frecuencias para cálculos (np.fft.freqs)
 
 # %%
-
-#Ejercicio 11
 
 #Ejercicio 11
 
