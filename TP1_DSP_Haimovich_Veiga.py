@@ -299,47 +299,17 @@ fig.show()
 
 from scipy import fftpack
 
-"""def mediaMovilD(x, M):
-    L = x.shape[0]
-    x_sample = np.zeros([L+(M-1), 1]) * 1.0
-    x_sample[(M-1):] = x
-    y = np.zeros(x.shape)
-    for i in range(0, L):
-        y[i] = x_sample[i, i+(M)].sum() / float(M)
-    return y"""
-
-"""def mediaMovilD(x, M):
-    x_sample = x.shape[0]
-    x_sample = x
-    y = np.zeros(x.shape)
-    for i in range(len(x)):
-        y =+ x
-    y = y/M
-    y = y / np.amax(y)
-    return y"""
-
-
-"""def mediaMovilD(x, M):
-    y = np.zeros(x.shape)
-    for i in range(int(0 + M/2), int(len(t)-(M/2)+1)):
-        y[i] = 0
-        for j in range(int(-M/2), int((M/2)+1)):
-            y[i] =+ x[i+j]
-        y = y[i] / M
-    return y"""
 
 def mediaMovilD(x, M):
-    t5 = x.shape[0]
-    x_temp = np.zeros([t5, 1]) * 1.0
-    x_temp = x
-    y = np.zeros(x.shape)
-    for i in range(0, t5):
-        y[i] = x_temp[i:i+(M)].sum() / float(M)
-    y = y / np.amax(y)
+    y = np.zeros(len(x))
+    for i in range(M//2, len(x) - M//2):
+        y[i] = 0.0
+        for j in range(-M//2, M//2 + 1):
+            y[i] += x[i+j]
+        y[i] = y[i] / M
     return y
 
-
-filtranding = mediaMovilD(A, 10)
+filtranding = mediaMovilD(A, 40)
 plt.figure(1)
 plt.plot(t, filtranding)
 plt.xlim(0, 8/f0)
@@ -440,6 +410,9 @@ import sounddevice as sd
 
 #Importo archivo de audio y lo guardo en variable respuesta al impulso h
 h, fs = sf.read('Resp_Imp.wav')
+th = np.linspace(0, 2, len(h))
+plt.figure(figsize=(25,15))
+plt.plot(th, h)
 
 #Defino funciones a utilizar
 from conv_circular import circular_convolve, _periodic_summation
@@ -450,16 +423,16 @@ conv = conv / np.amax(conv)
 
 #Convolucion circular
 #Usando funcion suma periodica igualo las longitudes de las 2 señales
-in1 = _periodic_summation(A, len(h))
-in2 = _periodic_summation(h, len(h))
+#in1 = _periodic_summation(A, len(h))
+#in2 = _periodic_summation(h, len(h))
 #Convolucion
 conv_circ = circular_convolve(A, h, len(h))
 conv_circ = conv_circ / np.amax(conv_circ)
 
 #Convolucion lineal mismo periodo que la circular
 #Usando funcion suma periodica llevo las longitudes a la longitud de la convolucion lineal
-in1 = _periodic_summation(A, len(conv))
-in2 = _periodic_summation(h, len(conv))
+#in1 = _periodic_summation(A, len(conv))
+#in2 = _periodic_summation(h, len(conv))
 #Convolucion
 circ_lin = circular_convolve(A, h, len(conv))
 circ_lin = circ_lin / np.amax(circ_lin)
@@ -475,27 +448,27 @@ t3 = np.linspace(0,2,len(circ_lin))
 plt.figure(figsize=(25,15))
 plt.subplot(2,2,1)
 plt.plot(t1, conv)
-plt.xlim(0, 0.1)
+plt.xlim(0, 0.25)
 plt.title("Convolucion lineal")
 
 #Grafico convolucion circular
 plt.subplot(2,2,2)
 plt.plot(t2, conv_circ)
-plt.xlim(0, 0.1)
+plt.xlim(0, 0.25)
 plt.title("Convolucion circular")
 
 #Grafico convolucion circular de misma longitud que la lineal
 plt.subplot(2,2,3)
 plt.plot(t3, circ_lin)
-plt.xlim(0, 0.1)
+plt.xlim(0, 0.25)
 plt.title("Conv circular (misma long que conv lineal)")
 
 plt.show()
 
-#Genero audios de las señales convolucionadas
+"""#Genero audios de las señales convolucionadas
 sf.write('Conv.wav',conv,fs)
 sf.write('Conv circular.wav',conv_circ,fs)
-sf.write('Circular (igual lineal).wav',circ_lin,fs)
+sf.write('Circular (igual lineal).wav',circ_lin,fs)"""
 
 
 # %%
