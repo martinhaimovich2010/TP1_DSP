@@ -448,19 +448,19 @@ t3 = np.linspace(0,2,len(circ_lin))
 plt.figure(figsize=(25,15))
 plt.subplot(2,2,1)
 plt.plot(t1, conv)
-plt.xlim(0, 0.25)
+#plt.xlim(0, 0.25)
 plt.title("Convolucion lineal")
 
 #Grafico convolucion circular
 plt.subplot(2,2,2)
 plt.plot(t2, conv_circ)
-plt.xlim(0, 0.25)
+#plt.xlim(0, 0.25)
 plt.title("Convolucion circular")
 
 #Grafico convolucion circular de misma longitud que la lineal
 plt.subplot(2,2,3)
 plt.plot(t3, circ_lin)
-plt.xlim(0, 0.25)
+#plt.xlim(0, 0.25)
 plt.title("Conv circular (misma long que conv lineal)")
 
 plt.show()
@@ -716,10 +716,86 @@ plt.title("DFT señal ruidosa 3 con Blackman")
 
 #Ejercicio 12
 
-
-
 # %%
 
 #Ejercicio 13
+
+pref = 0.00002
+
+f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=80)
+Zxx1_mag = np.abs(20*np.log10(Zxx1/pref))
+Zxx1_phase = np.angle(Zxx1)
+#Grafico magnitud en dB
+plt.figure(1)
+plt.pcolormesh(t1, f1, Zxx1_mag)
+plt.title("Magnitud con ventana Hann")
+plt.xlabel("Tiempo")
+plt.ylabel("Frecuencia")
+#plt.ylim(0,2500)
+#Grafico fase
+plt.figure(2)
+plt.pcolormesh(t1, f1, Zxx1_phase)
+plt.title("Fase con ventana Hann")
+plt.xlabel("Tiempo")
+plt.ylabel("Frecuencia")
+
+
+f2, t2, Zxx2 = sig.stft(A, fs, window=blackMan, nperseg=len(blackMan))
+Zxx2_mag = np.abs(20*np.log10(Zxx2/pref))
+Zxx2_phase = np.angle(Zxx2)
+#Grafico magnitud en dB
+plt.figure(3)
+plt.pcolormesh(t2, f2, Zxx2_mag)
+plt.title("Magnitud con ventana Blackman")
+plt.xlabel("Tiempo")
+plt.ylabel("Frecuencia")
+plt.ylim(0,2500)
+#Grafico fase
+plt.figure(4)
+plt.pcolormesh(t2, f2, Zxx2_phase)
+plt.title("Fase con ventana Blackman")
+plt.xlabel("Tiempo")
+plt.ylabel("Frecuencia")
+
+f3, t3, Zxx3 = sig.stft(A, fs, window=w, nperseg=len(w))
+Zxx3_mag = np.abs(20*np.log10(Zxx3/pref))
+Zxx3_phase = np.angle(Zxx3)
+#Grafico magnitud en dB
+plt.figure(5)
+plt.pcolormesh(t3, f3, Zxx3_mag)
+plt.title("Magnitud con ventana rectangular")
+plt.xlabel("Tiempo")
+plt.ylabel("Frecuencia")
+plt.ylim(0,2500)
+#Grafico fase
+plt.figure(6)
+plt.pcolormesh(t3, f3, Zxx3_phase)
+plt.title("Fase con ventana rectangular")
+plt.xlabel("Tiempo")
+plt.ylabel("Frecuencia")
+
+
+
+
+"""
+#Con el codigo que uso nahue en la clase
+import librosa.display
+M = 1000
+hop = 512
+
+A_stft = librosa.core.stft(A, hop_length=hop, n_fft=M)
+spectogram_A = np.abs(A_stft)/np.max(np.abs(A_stft))
+
+fig_10 = plt.figure(figsize=(14,6))
+plt.subplot2grid(shape = (1,2), loc =(0,0))
+librosa.display.specshow(spectogram_A, sr=fs, hop_length=hop, y_axis="linear", x_axis="time")
+plt.title("Suma", fantsize=16)
+plt.xlabel("Tiempo [s]")
+plt.ylabel("Frecuencia [Hz]")
+plt.ylim(0,2500)
+plt.colorbar()
+plt.tight_layout()
+plt.show()"""
+
 
 
