@@ -316,7 +316,7 @@ def mediamovildr(x,M):
     if len(x)>M:
         y = np.zeros(len(x))
         acc=0.0
-        for i in range(0,M//2):
+        for i in range(0,M):
             acc += x[i]
         y[M//2] = acc/M
         for i in range((M//2)+1,(len(y)-(M//2))):
@@ -804,6 +804,8 @@ plt.title("DFT señal ruidosa 3 con Blackman")
 # %%
 
 #Ejercicio 12
+
+pref = 0.00002
 
 # %%
 
