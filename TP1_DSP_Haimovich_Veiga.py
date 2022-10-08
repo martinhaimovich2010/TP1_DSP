@@ -293,15 +293,19 @@ fig.show()
 #Ejercicio 5
 
 from scipy import fftpack
-
+import time
 
 def mediaMovilD(x, M):
+    inicio = time.time()
     y = np.zeros(len(x))
     for i in range(M//2, len(x) - M//2):
         y[i] = 0.0
         for j in range(-M//2, M//2 + 1):
             y[i] += x[i+j]
         y[i] = y[i] / M
+    final = time.time()
+    tiempo = final-inicio
+    print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
     return y
 
 filtranding = mediaMovilD(A, 40)
@@ -310,7 +314,12 @@ plt.plot(t, filtranding)
 plt.xlim(0, 8/f0)
 plt.ylim(-2,2)
 
+plt.show()
+
+
+
 def mediamovildr(x,M):
+    inicio = time.time()
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     if len(x)>M:
@@ -322,9 +331,15 @@ def mediamovildr(x,M):
         for i in range((M//2)+1,(len(y)-(M//2))):
             acc = acc + x[i+((M-1)//2)]-x[i-(((M-1)//2)+1)]
             y[i] = acc/M
+        final = time.time()
+        tiempo = final-inicio
+        print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
         return (y-np.mean(y))/np.amax(y-np.mean(y)) # Esta normalización y desplazamiento deberían solucionarse de otra forma.
     else:
         s=len(x)-M
+        final = time.time()
+        tiempo = final-inicio
+        print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
         return np.hstack([np.zeros(M-1),np.mean(x[s:s+M-1])])
 
 xfr = mediamovildr(A,10)
@@ -334,26 +349,23 @@ plt.plot(t, xfr)
 plt.xlim(0, 8/f0)
 plt.ylim(-2,2)
 
+plt.show()
+
+
+
 
 #%%
 #Ejercicio 6
 
-M = 22000
+M = 40
 
 w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
 #Hago la convolucion entre la ventana y la señal
-h = np.convolve(A, w, mode='full')
+h = sig.convolve(A, w, mode='full')
 h = h / np.amax(h)
 
-#Grafico la señal filtrada del ejercicio 5
-plt.subplot(1,2,2)
-filtranding = mediaMovilD(A, 1000)
-# filtranding = mediaMovilD(A, 1000)
-plt.plot(t, filtranding)
-plt.xlim(0, 8/f0)
-plt.ylim(-1,1)
-    
-plt.figure(1)
+   
+plt.figure(figsize=(20,10))
 
 #Grafico la convolucion entre w y la señal del ejercicio 1
 plt.subplot(1,2,1)
@@ -362,6 +374,18 @@ plt.xlim(0, 8/f0)
 plt.ylim(-1,1)
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
+plt.title("Señal filtrada por convolucion")
+
+#Grafico la señal filtrada del ejercicio 5
+plt.subplot(1,2,2)
+filtranding = mediaMovilD(A, 40)
+# filtranding = mediaMovilD(A, 1000)
+plt.plot(t, filtranding)
+plt.xlim(0, 8/f0)
+plt.ylim(-1,1)
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud")
+plt.title("Señal filtrada ej 5")
 
 plt.show()
 
@@ -413,7 +437,7 @@ plt.plot(th, h)
 from conv_circular import circular_convolve, _periodic_summation
 
 #Convolucion lineal
-conv = np.convolve(A, h, mode='full')
+conv = sig.convolve(A, h, mode='full')
 conv = conv / np.amax(conv)
 
 #Convolucion circular
@@ -460,10 +484,10 @@ plt.title("Conv circular (misma long que conv lineal)")
 
 plt.show()
 
-"""#Genero audios de las señales convolucionadas
+#Genero audios de las señales convolucionadas
 sf.write('Conv.wav',conv,fs)
 sf.write('Conv circular.wav',conv_circ,fs)
-sf.write('Circular (igual lineal).wav',circ_lin,fs)"""
+sf.write('Circular (igual lineal).wav',circ_lin,fs)
 
 
 # %%
@@ -708,11 +732,12 @@ AX1_b = AX1 * blackMan
 AX2_b = AX2 * blackMan
 AX3_b = AX3 * blackMan
 
+from scipy.fft import fft, rfft
 #Hago la DFT de las señales multiplicadas por la ventana rectangular
-A_w_dft = np.fft.rfft(A_w)
-AX1_w_dft = np.fft.rfft(AX1_w)
-AX2_w_dft = np.fft.rfft(AX2_w)
-AX3_w_dft = np.fft.rfft(AX3_w)
+A_w_dft = rfft(A_w)
+AX1_w_dft = rfft(AX1_w)
+AX2_w_dft = rfft(AX2_w)
+AX3_w_dft = rfft(AX3_w)
 #Normalizo
 A_w_dft = A_w_dft / np.amax(A_w_dft)
 AX1_w_dft = AX1_w_dft / np.amax(AX1_w_dft)
@@ -720,10 +745,10 @@ AX2_w_dft = AX2_w_dft / np.amax(AX2_w_dft)
 AX3_w_dft = AX3_w_dft / np.amax(AX3_w_dft)
 
 #Hago la DFT de las señales multiplicadas por la ventana de Hann
-A_h_dft = np.fft.rfft(A_h)
-AX1_h_dft = np.fft.rfft(AX1_h)
-AX2_h_dft = np.fft.rfft(AX2_h)
-AX3_h_dft = np.fft.rfft(AX3_h)
+A_h_dft = rfft(A_h)
+AX1_h_dft = rfft(AX1_h)
+AX2_h_dft = rfft(AX2_h)
+AX3_h_dft = rfft(AX3_h)
 #Normalizo
 A_h_dft = A_h_dft / np.amax(A_h_dft)
 AX1_h_dft = AX1_h_dft / np.amax(AX1_h_dft)
@@ -731,10 +756,10 @@ AX2_h_dft = AX2_h_dft / np.amax(AX2_h_dft)
 AX3_h_dft = AX3_h_dft / np.amax(AX3_h_dft)
 
 #Hago la DFT de las señales multiplicadas por la ventana de Blackman
-A_b_dft = np.fft.rfft(A_b)
-AX1_b_dft = np.fft.rfft(AX1_b)
-AX2_b_dft = np.fft.rfft(AX2_b)
-AX3_b_dft = np.fft.rfft(AX3_b)
+A_b_dft = rfft(A_b)
+AX1_b_dft = rfft(AX1_b)
+AX2_b_dft = rfft(AX2_b)
+AX3_b_dft = rfft(AX3_b)
 #Normalizo
 A_b_dft = A_b_dft / np.amax(A_b_dft)
 AX1_b_dft = AX1_b_dft / np.amax(AX1_b_dft)
@@ -745,61 +770,165 @@ AX3_b_dft = AX3_b_dft / np.amax(AX3_b_dft)
 f = np.arange(0, fs//2, (fs//2)/len(A_w_dft)) #Podria haber dividido a la mitad de fs por la longitud de cualquiera de las transformadas
 
 #Grafico todo
-plt.figure(figsize=(25,15))
+plt.figure(figsize=(35,25))
 #Grafico las transformadas de la señal limpia
 plt.subplot(4,3,1)
 plt.plot(f, abs(A_w_dft))
-plt.title("DFT señal limpia con triangular")
-
+plt.title("DFT señal limpia con rectangular")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 plt.subplot(4,3,2)
 plt.plot(f, abs(A_h_dft))
 plt.title("DFT señal limpia con Hann")
-
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 plt.subplot(4,3,3)
 plt.plot(f, abs(A_b_dft))
 plt.title("DFT señal limpia con Blackman")
-
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 
 #Grafico las transformadas de la primer señal con ruido
 plt.subplot(4,3,4)
 plt.plot(f, abs(AX1_w_dft))
-plt.title("DFT señal ruidosa 1 con triangular")
-
+plt.title("DFT señal ruidosa 1 con rectangular")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 plt.subplot(4,3,5)
 plt.plot(f, abs(AX1_h_dft))
 plt.title("DFT señal ruidosa 1 con Hann")
-
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 plt.subplot(4,3,6)
 plt.plot(f, abs(AX1_b_dft))
 plt.title("DFT señal ruidosa 1 con Blackman")
-
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 
 #Grafico las transformadas de la segunda señal con ruido
 plt.subplot(4,3,7)
 plt.plot(f, abs(AX2_w_dft))
-plt.title("DFT señal ruidosa 2 con triangular")
-
+plt.title("DFT señal ruidosa 2 con rectangular")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 plt.subplot(4,3,8)
 plt.plot(f, abs(AX2_h_dft))
 plt.title("DFT señal ruidosa 2 con Hann")
-
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 plt.subplot(4,3,9)
 plt.plot(f, abs(AX2_b_dft))
 plt.title("DFT señal ruidosa 2 con Blackman")
-
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 
 #Grafico las transformadas de la tercer señal con ruido
 plt.subplot(4,3,10)
 plt.plot(f, abs(AX3_w_dft))
-plt.title("DFT señal ruidosa 3 con triangular")
-
+plt.title("DFT señal ruidosa 3 con rectangular")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 plt.subplot(4,3,11)
 plt.plot(f, abs(AX3_h_dft))
 plt.title("DFT señal ruidosa 3 con Hann")
-
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
 plt.subplot(4,3,12)
 plt.plot(f, abs(AX3_b_dft))
 plt.title("DFT señal ruidosa 3 con Blackman")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Amplitud")
+
+#Convierto la magnitud de las transformadas en dB
+pref = 0.00002
+#Ventana rectangular
+A_w_dft_db = 20*np.log10(A_w_dft / pref)
+AX1_w_dft_db = 20*np.log10(AX1_w_dft / pref)
+AX2_w_dft_db = 20*np.log10(AX2_w_dft / pref)
+AX3_w_dft_db = 20*np.log10(AX3_w_dft / pref)
+#Ventana Hann
+A_h_dft_db = 20*np.log10(A_h_dft / pref)
+AX1_h_dft_db = 20*np.log10(AX1_h_dft / pref)
+AX2_h_dft_db = 20*np.log10(AX2_h_dft / pref)
+AX3_h_dft_db = 20*np.log10(AX3_h_dft / pref)
+#Ventana Blackman
+A_b_dft_db = 20*np.log10(A_b_dft / pref)
+AX1_b_dft_db = 20*np.log10(AX1_b_dft / pref)
+AX2_b_dft_db = 20*np.log10(AX2_b_dft / pref)
+AX3_b_dft_db = 20*np.log10(AX3_b_dft / pref)
+
+#Grafico las transformadas en escala logaritmica
+
+plt.figure(figsize=(36,26))
+#Grafico las transformadas de la señal limpia
+plt.subplot(4,3,1)
+plt.plot(f, abs(A_w_dft_db))
+plt.title("DFT señal limpia con rectangular")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+plt.subplot(4,3,2)
+plt.plot(f, abs(A_h_dft_db))
+plt.title("DFT señal limpia con Hann")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+plt.subplot(4,3,3)
+plt.plot(f, abs(A_b_dft_db))
+plt.title("DFT señal limpia con Blackman")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+
+#Grafico las transformadas de la primer señal con ruido
+plt.subplot(4,3,4)
+plt.plot(f, abs(AX1_w_dft_db))
+plt.title("DFT señal ruidosa 1 con rectangular")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+plt.subplot(4,3,5)
+plt.plot(f, abs(AX1_h_dft_db))
+plt.title("DFT señal ruidosa 1 con Hann")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+plt.subplot(4,3,6)
+plt.plot(f, abs(AX1_b_dft_db))
+plt.title("DFT señal ruidosa 1 con Blackman")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+
+#Grafico las transformadas de la segunda señal con ruido
+plt.subplot(4,3,7)
+plt.plot(f, abs(AX2_w_dft_db))
+plt.title("DFT señal ruidosa 2 con rectangular")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+plt.subplot(4,3,8)
+plt.plot(f, abs(AX2_h_dft_db))
+plt.title("DFT señal ruidosa 2 con Hann")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+plt.subplot(4,3,9)
+plt.plot(f, abs(AX2_b_dft_db))
+plt.title("DFT señal ruidosa 2 con Blackman")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+
+#Grafico las transformadas de la tercer señal con ruido
+plt.subplot(4,3,10)
+plt.plot(f, abs(AX3_w_dft_db))
+plt.title("DFT señal ruidosa 3 con rectangular")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+plt.subplot(4,3,11)
+plt.plot(f, abs(AX3_h_dft_db))
+plt.title("DFT señal ruidosa 3 con Hann")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+plt.subplot(4,3,12)
+plt.plot(f, abs(AX3_b_dft_db))
+plt.title("DFT señal ruidosa 3 con Blackman")
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("dB")
+
+plt.show()
 
 # %%
 
@@ -863,7 +992,7 @@ plt.title("Fase con ventana rectangular")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
-
+plt.show()
 
 
 """
