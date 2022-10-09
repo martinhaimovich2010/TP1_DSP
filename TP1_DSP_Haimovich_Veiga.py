@@ -24,7 +24,7 @@ t = np.linspace(0,2,N)
 A = np.zeros(N)
 
 #Voy agregandole elementos al vector A (armonicos) y grafico cada armonico
-plt.figure(figsize=(25,15))
+plt.figure(1,figsize=(17,9))
 for k in range(1,K+1):
     armonicos = (1/k) * np.sin(2*n*k*np.pi*(f0/fs))
     A += armonicos
@@ -49,6 +49,7 @@ plt.xlim(0,(8/f0))
 plt.title('Señal LA 440 + Armónicos')
 plt.xlabel("Tiempo [s]")
 plt.ylabel("Amplitud Normalizada")
+plt.tight_layout()
 plt.show()
 
 print("Se puede ver que la señal resultante es una diente de sierra")
@@ -103,12 +104,13 @@ for i in arrayTabla:
 # Grafico en tabla
 DC_SNR_layout = go.Layout(
     title='Desviación Estándar y Error según longitud de señal',
+    title_x=0.5,
     margin=go.layout.Margin(
         autoexpand=True
     )
 )
 
-fig = go.Figure(data=[go.Table(header=dict(values=['L', 'Sigma', 'Error %'],align='center'),
+fig = go.Figure(data=[go.Table(header=dict(values=['L [muestras]', ' Desv. Estándar', 'Error [%]'],align='center'),
                 cells=dict(values=[np.array(arrayTabla).astype(str), np.around(dsArray, 2), np.around(errorArray,2)],align='center'))
                 ],
                 layout=DC_SNR_layout)
@@ -144,9 +146,10 @@ AX3max = np.amax(AX3)
 AX3 = AX3 * (1/AX3max)
 
 #Grafico las 3 señales normalizadas
-plt.figure(figsize=(25,15))
+plt.figure(3, figsize=(15,7))
 plt.subplot(2,2,1)
 plt.plot(t, AX1)
+plt.title('Señal con ruido de σ=1')
 plt.xlabel("Tiempo")
 plt.ylabel("AX1")
 plt.xlim(0, 16/f0)
@@ -154,6 +157,7 @@ plt.xlim(0, 16/f0)
 
 plt.subplot(2,2,2)
 plt.plot(t, AX2)
+plt.title('Señal con ruido de σ=0.1')
 plt.xlabel("Tiempo")
 plt.ylabel("AX2")
 plt.xlim(0, 16/f0)
@@ -161,9 +165,11 @@ plt.xlim(0, 16/f0)
 
 plt.subplot(2,2,3)
 plt.plot(t, AX3)
+plt.title('Señal con ruido de σ=3')
 plt.xlabel("Tiempo")
 plt.ylabel("AX3")
 plt.xlim(0, 16/f0)
+plt.tight_layout()
 plt.show()
 
 #Defino formula que calcula relacion señal ruido
@@ -206,12 +212,13 @@ SNR12 = Señal_Ruido(AX3_C3,sigma3,fs/f0)
 
 DC_SNR_layout = go.Layout(
     title='Relaciones Señal-Ruido para distintas desviaciones estándar',
+    title_x=0.5,    
     margin=go.layout.Margin(
         autoexpand=True
     )
 )
 
-fig = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Sigma', 'SNR', 'SNR con DC=-10', 'SNR con DC=10', 'SNR con DC=1000'],align='center'),
+fig = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Desv. Estándar', 'SNR', 'SNR con DC=-10', 'SNR con DC=10', 'SNR con DC=1000'],align='center'),
                 cells=dict(values=[["Señal 1", "Señal 2", "Señal 3"], [sigma1, sigma2, sigma3] , [SNR1, SNR2, SNR3], [SNR4, SNR5, SNR6], [SNR7, SNR8, SNR9], [SNR10, SNR11, SNR12]],align='center'))
                 ],
                 layout=DC_SNR_layout)
@@ -252,9 +259,10 @@ randNoiseSignals10, averageA_RN10, SNR_average10 = promedio_ensamble(10)
 randNoiseSignals100, averageA_RN100, SNR_average100 = promedio_ensamble(100)
 randNoiseSignals1000, averageA_RN1000, SNR_average1000 = promedio_ensamble(1000)
 
-plt.figure(figsize=(25,15))
+plt.figure(5, figsize=(15,7))
 plt.subplot(2,2,1)
 plt.plot(t, averageA_RN10)
+plt.title('Promedio Ensamble N=10')
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud Normalizada")
 plt.xlim(0, 16/f0)
@@ -262,6 +270,7 @@ plt.xlim(0, 16/f0)
 
 plt.subplot(2,2,2)
 plt.plot(t, averageA_RN100)
+plt.title('Promedio Ensamble N=100')
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud Normalizada")
 plt.xlim(0, 16/f0)
@@ -269,13 +278,16 @@ plt.xlim(0, 16/f0)
 
 plt.subplot(2,2,3)
 plt.plot(t, averageA_RN1000)
+plt.title('Promedio Ensamble N=1000')
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud Normalizada")
 plt.xlim(0, 16/f0)
+plt.tight_layout()
 plt.show()
 
 DC_SNR_layout = go.Layout(
     title='SNR para Promedio Ensamble',
+    title_x=0.5,
     margin=go.layout.Margin(
         autoexpand=True
     )
@@ -287,6 +299,7 @@ fig = go.Figure(data=[go.Table(header=dict(values=['Cantidad de señales de ruid
                 layout=DC_SNR_layout)
 fig.show()
 
+# Justificar elección de M
 
 # %%
 
@@ -296,30 +309,32 @@ from scipy import fftpack
 import time
 
 def mediaMovilD(x, M):
-    inicio = time.time()
     y = np.zeros(len(x))
     for i in range(M//2, len(x) - M//2):
         y[i] = 0.0
         for j in range(-M//2, M//2 + 1):
             y[i] += x[i+j]
         y[i] = y[i] / M
-    final = time.time()
-    tiempo = final-inicio
-    print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
     return y
 
+inicio = time.time()
 filtranding = mediaMovilD(A, 40)
-plt.figure(1)
+final = time.time()
+tiempo = final-inicio
+print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
+
+plt.figure(6)
 plt.plot(t[20:], filtranding[20:])
+plt.title('Señal filtrada con filtro MA, M=40')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Amplitud')
 plt.xlim(0, 8/f0)
 plt.ylim(-2,2)
 
+plt.tight_layout()
 plt.show()
 
-
-
 def mediamovildr(x,M):
-    inicio = time.time()
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     if len(x)>M:
@@ -331,20 +346,22 @@ def mediamovildr(x,M):
         for i in range((M//2)+1,(len(y)-(M//2))):
             acc = acc + x[i+((M-1)//2)]-x[i-(((M-1)//2)+1)]
             y[i] = acc/M
-        final = time.time()
-        tiempo = final-inicio
-        print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
         return y # Esta normalización y desplazamiento deberían solucionarse de otra forma.
     else:
         s=len(x)-M
-        final = time.time()
-        tiempo = final-inicio
-        print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
         return np.hstack([np.zeros(M-1),np.mean(x[s:s+M-1])])
 
+inicio = time.time()
 xfr = mediamovildr(A,40)
-plt.figure(2)
+final = time.time()
+tiempo = final-inicio
+print("El tiempo que tarda el filtro de implementación recursiva en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
+
+plt.figure(7)
 plt.plot(t[20:], xfr[20:])
+plt.title('Señal filtrada con filtro MA, M=40, Implementación recursiva')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Amplitud')
 plt.xlim(0, 8/f0)
 plt.ylim(-2,2)
 
@@ -361,7 +378,7 @@ h = sig.convolve(A, w, mode='full')
 h = h / np.amax(h)
 
    
-plt.figure(figsize=(20,10))
+plt.figure(8, figsize=(15,7))
 
 #Grafico la convolucion entre w y la señal del ejercicio 1
 plt.subplot(1,2,1)
@@ -374,8 +391,10 @@ plt.title("Señal filtrada por convolucion")
 
 #Grafico la señal filtrada del ejercicio 5
 plt.subplot(1,2,2)
-filtranding = mediaMovilD(A, 40)
-# filtranding = mediaMovilD(A, 1000)
+# Usando implementación recursiva
+filtranding = mediamovildr(A, 40)
+# Normalizo
+filtranding = filtranding / np.amax(filtranding)
 plt.plot(t, filtranding)
 plt.xlim(0, 8/f0)
 plt.ylim(-1,1)
@@ -383,11 +402,12 @@ plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
 plt.title("Señal filtrada ej 5")
 
+plt.tight_layout()
 plt.show()
 
 #%%
 
-#Ejercicio 7
+# Ejercicio 7
 
 M = 100
 
@@ -398,21 +418,22 @@ blackMan = np.zeros(M)
 for i in range(M):
     blackMan[i] = a0 - a1 * np.cos((2*np.pi*i)/(M-1)) + a2 * np.cos((4*np.pi*i)/(M-1)) 
 
-#Convoluciono el filtro black man con la señal del ejercicio 1
+# Convoluciono el filtro black man con la señal del ejercicio 1
 convBlack = np.convolve(A, blackMan, mode='full')
-#normalizo
+# Normalizo
 convBlack = convBlack / np.amax(convBlack)
 
-#Defino muestras iniciales y finales para graficar la señal filtrada quitando las muestras agregadas por la convolución en los extremos.
+# Defino muestras iniciales y finales para graficar la señal filtrada quitando las muestras agregadas por la convolución en los extremos.
 convBlackStart = ( (len(convBlack)-len(t)) // 2 )
 convBlackEnd = ( (len(convBlack)+len(t)) // 2 )
 
 #Grafico
-plt.figure(1)
+plt.figure(9)
 plt.plot(t, convBlack[0:len(t)])
 plt.xlim(0.0031, 8/f0)
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -730,37 +751,37 @@ AX3_b = AX3 * blackMan
 
 from scipy.fft import fft, rfft
 #Hago la DFT de las señales multiplicadas por la ventana rectangular
-A_w_dft = rfft(A_w)
-AX1_w_dft = rfft(AX1_w)
-AX2_w_dft = rfft(AX2_w)
-AX3_w_dft = rfft(AX3_w)
+A_w_dft = np.abs(rfft(A_w))
+AX1_w_dft = np.abs(rfft(AX1_w))
+AX2_w_dft = np.abs(rfft(AX2_w))
+AX3_w_dft = np.abs(rfft(AX3_w))
 #Normalizo
-A_w_dft = A_w_dft / np.amax(A_w_dft)
-AX1_w_dft = AX1_w_dft / np.amax(AX1_w_dft)
-AX2_w_dft = AX2_w_dft / np.amax(AX2_w_dft)
-AX3_w_dft = AX3_w_dft / np.amax(AX3_w_dft)
+# A_w_dft = A_w_dft / np.amax(A_w_dft)
+# AX1_w_dft = AX1_w_dft / np.amax(AX1_w_dft)
+# AX2_w_dft = AX2_w_dft / np.amax(AX2_w_dft)
+# AX3_w_dft = AX3_w_dft / np.amax(AX3_w_dft)
 
 #Hago la DFT de las señales multiplicadas por la ventana de Hann
-A_h_dft = rfft(A_h)
-AX1_h_dft = rfft(AX1_h)
-AX2_h_dft = rfft(AX2_h)
-AX3_h_dft = rfft(AX3_h)
+A_h_dft = np.abs(rfft(A_h))
+AX1_h_dft = np.abs(rfft(AX1_h))
+AX2_h_dft = np.abs(rfft(AX2_h))
+AX3_h_dft = np.abs(rfft(AX3_h))
 #Normalizo
-A_h_dft = A_h_dft / np.amax(A_h_dft)
-AX1_h_dft = AX1_h_dft / np.amax(AX1_h_dft)
-AX2_h_dft = AX2_h_dft / np.amax(AX2_h_dft)
-AX3_h_dft = AX3_h_dft / np.amax(AX3_h_dft)
+# A_h_dft = A_h_dft / np.amax(A_h_dft)
+# AX1_h_dft = AX1_h_dft / np.amax(AX1_h_dft)
+# AX2_h_dft = AX2_h_dft / np.amax(AX2_h_dft)
+# AX3_h_dft = AX3_h_dft / np.amax(AX3_h_dft)
 
 #Hago la DFT de las señales multiplicadas por la ventana de Blackman
-A_b_dft = rfft(A_b)
-AX1_b_dft = rfft(AX1_b)
-AX2_b_dft = rfft(AX2_b)
-AX3_b_dft = rfft(AX3_b)
+A_b_dft = np.abs(rfft(A_b))
+AX1_b_dft = np.abs(rfft(AX1_b))
+AX2_b_dft = np.abs(rfft(AX2_b))
+AX3_b_dft = np.abs(rfft(AX3_b))
 #Normalizo
-A_b_dft = A_b_dft / np.amax(A_b_dft)
-AX1_b_dft = AX1_b_dft / np.amax(AX1_b_dft)
-AX2_b_dft = AX2_b_dft / np.amax(AX2_b_dft)
-AX3_b_dft = AX3_b_dft / np.amax(AX3_b_dft)
+# A_b_dft = A_b_dft / np.amax(A_b_dft)
+# AX1_b_dft = AX1_b_dft / np.amax(AX1_b_dft)
+# AX2_b_dft = AX2_b_dft / np.amax(AX2_b_dft)
+# AX3_b_dft = AX3_b_dft / np.amax(AX3_b_dft)
 
 #Creo vector de frecuencias para graficar las DFTs
 f = np.arange(0, fs//2, (fs//2)/len(A_w_dft)) #Podria haber dividido a la mitad de fs por la longitud de cualquiera de las transformadas
@@ -926,9 +947,11 @@ plt.ylabel("dB")
 
 plt.show()
 
+# Ver Atenuación de SNR y ancho de lóbulo principal
+
 # %%
 
-#Ejercicio 12
+# Ejercicio 12
 
 pref = 0.00002
 f = np.arange(0, fs//2, (fs//2)/len(A_w_dft))
@@ -984,7 +1007,6 @@ print(M_minus3dB_AX3)
 MA_3dB_880 = np.hstack([np.ones(M_minus3dB_AX1+1),np.zeros(len(AX1)-M_minus3dB_AX1-1)])
 MA_3dB_880_fft = np.abs(rfft(MA_3dB_880))
 MA_3dB_880_fft = MA_3dB_880_fft/np.amax(MA_3dB_880_fft)
-MA_3dB_880_mag = 20*np.log10(np.abs(rfft(MA_1))/1)
 
 # Filtro las 3 señales con sus respectivos filtros MA y luego transformo y normalizo
 AX1_filt880 = mediamovildr(AX1, M_minus3dB_AX1)
@@ -1016,7 +1038,7 @@ plt.title('Respuesta en frecuencia de filtro MA')
 plt.xlabel('Frecuencia')
 plt.ylabel('Amplitud')
 plt.plot(f,MA_3dB_880_fft)
-plt.xlim(0,1000)
+plt.xlim(0,5000)
 
 f_AX = np.arange(0, fs//2, (fs//2)/len(AX1_filt880_fft))
 
@@ -1027,7 +1049,7 @@ plt.ylabel('Amplitud')
 plt.plot(f_AX,AX1_fft, label='Original')
 plt.plot(f_AX,AX1_filt880_fft, label='Filtrada')
 plt.legend(loc='upper right', shadow=True)
-plt.xlim(0,2500)
+plt.xlim(0,5000)
 
 plt.subplot(2,2,3)
 plt.title('Señal x2 filtrada')
@@ -1036,7 +1058,7 @@ plt.ylabel('Amplitud')
 plt.plot(f_AX,AX2_fft, label='Original')
 plt.plot(f_AX,AX2_filt880_fft, label='Filtrada')
 plt.legend(loc='upper right', shadow=True)
-plt.xlim(0,2500)
+plt.xlim(0,5000)
 
 plt.subplot(2,2,4)
 plt.title('Señal x3 filtrada')
@@ -1045,7 +1067,7 @@ plt.ylabel('Amplitud')
 plt.plot(f_AX,AX3_fft, label='Original')
 plt.plot(f_AX,AX3_filt880_fft, label='Filtrada')
 plt.legend(loc='upper right', shadow=True)
-plt.xlim(0,2500)
+plt.xlim(0,5000)
 
 plt.tight_layout()
 plt.show()
@@ -1155,6 +1177,3 @@ plt.ylim(0,2500)
 plt.colorbar()
 plt.tight_layout()
 plt.show()"""
-
-
-
