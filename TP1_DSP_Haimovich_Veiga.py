@@ -1113,7 +1113,7 @@ print('Se observa que el filtrado del ruido tiene mayor eficacia para el ruido d
 
 #Ejercicio 13
 
-f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=80)
+f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=7000)
 Zxx1_mag = 20 * np.log10(np.abs(Zxx1))
 Zxx1_phase = np.angle(Zxx1)
 #Grafico magnitud en dB
@@ -1131,7 +1131,7 @@ plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
 
-f2, t2, Zxx2 = sig.stft(A, fs, window=blackMan, nperseg=len(blackMan))
+f2, t2, Zxx2 = sig.stft(A, fs, window='blackman', nperseg=6000)
 Zxx2_mag = 20 * np.log10(np.abs(Zxx2))
 Zxx2_phase = np.angle(Zxx2)
 #Grafico magnitud en dB
@@ -1148,7 +1148,7 @@ plt.title("Fase con ventana Blackman")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
-f3, t3, Zxx3 = sig.stft(A, fs, window=w, nperseg=len(w))
+f3, t3, Zxx3 = sig.stft(A, fs, window='boxcar', nperseg=2000)
 Zxx3_mag = 20 * np.log10(np.abs(Zxx3))
 Zxx3_phase = np.angle(Zxx3)
 #Grafico magnitud en dB
@@ -1166,24 +1166,3 @@ plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
 plt.show()
-
-
-"""
-#Con el codigo que uso nahue en la clase
-import librosa.display
-M = 1000
-hop = 512
-
-A_stft = librosa.core.stft(A, hop_length=hop, n_fft=M)
-spectogram_A = np.abs(A_stft)/np.max(np.abs(A_stft))
-
-fig_10 = plt.figure(figsize=(14,6))
-plt.subplot2grid(shape = (1,2), loc =(0,0))
-librosa.display.specshow(spectogram_A, sr=fs, hop_length=hop, y_axis="linear", x_axis="time")
-plt.title("Suma", fantsize=16)
-plt.xlabel("Tiempo [s]")
-plt.ylabel("Frecuencia [Hz]")
-plt.ylim(0,2500)
-plt.colorbar()
-plt.tight_layout()
-plt.show()"""
