@@ -310,7 +310,7 @@ def mediaMovilD(x, M):
 
 filtranding = mediaMovilD(A, 40)
 plt.figure(1)
-plt.plot(t, filtranding)
+plt.plot(t[20:], filtranding[20:])
 plt.xlim(0, 8/f0)
 plt.ylim(-2,2)
 
@@ -334,7 +334,7 @@ def mediamovildr(x,M):
         final = time.time()
         tiempo = final-inicio
         print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
-        return (y-np.mean(y))/np.amax(y-np.mean(y)) # Esta normalización y desplazamiento deberían solucionarse de otra forma.
+        return y # Esta normalización y desplazamiento deberían solucionarse de otra forma.
     else:
         s=len(x)-M
         final = time.time()
@@ -343,16 +343,12 @@ def mediamovildr(x,M):
         return np.hstack([np.zeros(M-1),np.mean(x[s:s+M-1])])
 
 xfr = mediamovildr(A,40)
-print(np.amin(xfr))
 plt.figure(2)
-plt.plot(t, xfr)
+plt.plot(t[20:], xfr[20:])
 plt.xlim(0, 8/f0)
 plt.ylim(-2,2)
 
 plt.show()
-
-
-
 
 #%%
 #Ejercicio 6
@@ -935,6 +931,149 @@ plt.show()
 #Ejercicio 12
 
 pref = 0.00002
+f = np.arange(0, fs//2, (fs//2)/len(A_w_dft))
+
+# Se genera una función para calcular la reducción en dB de un filtro de media móvil de ventana M para una frecuencia dada
+
+def dBreduction_MA_f (x ,M, f, fs=44100, pref=0.00002):
+    
+    # Transformada y normalización de x
+    x_fft = np.abs(rfft(x))
+
+    x_fft = x_fft/np.amax(x_fft)
+
+    # Creación, Transformada y Normalización del filtro
+    MA = np.hstack([np.ones(M),np.zeros(len(x)-M)])
+
+    MA_fft = np.abs(rfft(MA))
+
+    MA_fft = MA_fft/np.amax(MA_fft)
+
+    # Magnitud de la reducción en Dbs
+    MA_mag = 20*np.log10(MA_fft/x_fft)
+
+    # Índice correspondiente a la frecuencia buscada
+    index_freq = (f*2*len(MA))//fs
+
+    dBreduction = MA_mag[index_freq]
+
+    return dBreduction 
+
+# Se busca mediante iteración y comparación un número de muestras de la ventana que permita una reducción que no sobrepase los 3 dB, tomando el valor anterior a una reducción mayor a -3 dB (si este es negativo también).
+
+def M_for_minus3dB(x,f,fs=44100, pref=0.00002):
+    for i in range(1,fs//2):
+        dBdiff = dBreduction_MA_f(x,i,f)
+        if dBdiff < -3 and prevDiff<0 and prevDiff>-3:
+            M_minus3dB_x = i-1
+            break
+        prevDiff = dBdiff
+    return M_minus3dB_x, prevDiff
+
+M_minus3dB_AX1, dBdiffAX1 = M_for_minus3dB(AX1,880)
+M_minus3dB_AX2, dBdiffAX2 = M_for_minus3dB(AX2,880)
+M_minus3dB_AX3, dBdiffAX3 = M_for_minus3dB(AX3,880)
+
+# Las ventanas obtenidas son las siguientes.
+
+print(M_minus3dB_AX1)
+print(M_minus3dB_AX2)
+print(M_minus3dB_AX3)
+
+# Genero el filtro de media móvil con la ventana obtenida para x1
+MA_3dB_880 = np.hstack([np.ones(M_minus3dB_AX1+1),np.zeros(len(AX1)-M_minus3dB_AX1-1)])
+MA_3dB_880_fft = np.abs(rfft(MA_3dB_880))
+MA_3dB_880_fft = MA_3dB_880_fft/np.amax(MA_3dB_880_fft)
+MA_3dB_880_mag = 20*np.log10(np.abs(rfft(MA_1))/1)
+
+# Filtro las 3 señales con sus respectivos filtros MA y luego transformo y normalizo
+AX1_filt880 = mediamovildr(AX1, M_minus3dB_AX1)
+AX2_filt880 = mediamovildr(AX2, M_minus3dB_AX2)
+AX3_filt880 = mediamovildr(AX3, M_minus3dB_AX3)
+
+AX1_filt880_fft = np.abs(rfft(AX1_filt880))
+AX2_filt880_fft = np.abs(rfft(AX2_filt880))
+AX3_filt880_fft = np.abs(rfft(AX3_filt880))
+
+AX1_filt880_fft = AX1_filt880_fft / np.amax(AX1_filt880_fft)
+AX2_filt880_fft = AX2_filt880_fft / np.amax(AX2_filt880_fft)
+AX3_filt880_fft = AX3_filt880_fft / np.amax(AX3_filt880_fft)
+
+# Transormo y normalizo las señales originales para comparación
+AX1_fft = np.abs(rfft(AX1))
+AX2_fft = np.abs(rfft(AX2))
+AX3_fft = np.abs(rfft(AX3))
+
+AX1_fft = AX1_fft / np.amax(AX1_fft)
+AX2_fft = AX2_fft / np.amax(AX2_fft)
+AX3_fft = AX3_fft / np.amax(AX3_fft)
+
+(880*2*len(AX1_filt880))//fs
+
+plt.figure(figsize=(10,7))
+plt.subplot(2,2,1)
+plt.title('Respuesta en frecuencia de filtro MA')
+plt.xlabel('Frecuencia')
+plt.ylabel('Amplitud')
+plt.plot(f,MA_3dB_880_fft)
+plt.xlim(0,1000)
+
+f_AX = np.arange(0, fs//2, (fs//2)/len(AX1_filt880_fft))
+
+plt.subplot(2,2,2)
+plt.title('Señal x1 filtrada')
+plt.xlabel('Frecuencia')
+plt.ylabel('Amplitud')
+plt.plot(f_AX,AX1_fft, label='Original')
+plt.plot(f_AX,AX1_filt880_fft, label='Filtrada')
+plt.legend(loc='upper right', shadow=True)
+plt.xlim(0,2500)
+
+plt.subplot(2,2,3)
+plt.title('Señal x2 filtrada')
+plt.xlabel('Frecuencia')
+plt.ylabel('Amplitud')
+plt.plot(f_AX,AX2_fft, label='Original')
+plt.plot(f_AX,AX2_filt880_fft, label='Filtrada')
+plt.legend(loc='upper right', shadow=True)
+plt.xlim(0,2500)
+
+plt.subplot(2,2,4)
+plt.title('Señal x3 filtrada')
+plt.xlabel('Frecuencia')
+plt.ylabel('Amplitud')
+plt.plot(f_AX,AX3_fft, label='Original')
+plt.plot(f_AX,AX3_filt880_fft, label='Filtrada')
+plt.legend(loc='upper right', shadow=True)
+plt.xlim(0,2500)
+
+plt.tight_layout()
+plt.show()
+
+print('La atenuación del filtro en 880 Hz es de', (20*np.log10((MA_3dB_880_fft[(880*2*len(MA_3dB_880_fft))//fs])/(1))), 'dB')
+
+SNR1 = Señal_Ruido(AX1,sigma1,fs/f0)
+SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
+SNR3 = Señal_Ruido(AX3,sigma3,fs/f0)
+
+SNR1_filt880 = Señal_Ruido(AX1_filt880,sigma1,fs/f0)
+SNR2_filt880 = Señal_Ruido(AX2_filt880,sigma2,fs/f0)
+SNR3_filt880 = Señal_Ruido(AX3_filt880,sigma3,fs/f0)
+
+FILT880_SNR_layout = go.Layout(
+    title='Relaciones Señal-Ruido para distintas desviaciones estándar luego de filtrar',
+    margin=go.layout.Margin(
+        autoexpand=True
+    )
+)
+
+fig = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Sigma', 'SNR original', 'SNR filtrado'],align='center'),
+                cells=dict(values=[["Señal 1", "Señal 2", "Señal 3"], [sigma1, sigma2, sigma3] , [SNR1, SNR2, SNR3], [SNR1_filt880, SNR2_filt880, SNR3_filt880]],align='center'))
+                ],
+                layout=FILT880_SNR_layout)
+fig.show()
+
+print('Se observa que el filtrado del ruido tiene mayor eficacia para el ruido de sigma=3 (Reducción del 79%), mientras que el peor caso es el de Sigma=0.1 (reducción del 40,8%)')
 
 # %%
 
