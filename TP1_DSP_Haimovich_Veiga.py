@@ -998,6 +998,7 @@ print("La DFT de la señal limpia del ejercicio 1 multiplicada por la ventana re
 print("Se puede ver el componente armonico de la señal original en las respectivas transformadas, pero en la señal ruidosa 1 y 3 multiplicadas con la ventana rectangular es menos legible")
 print("Multiplicando las señales originales con las ventanas de Hann y Blackman se pueden ver de forma mas notoria los armonicos de la señal del ejercicio 1")
 print("A medida que la desviacion estandar de la señal aumenta el ruido es mayor. Esto se puede ver comparando los graficos de las tres señales con ruido")
+
 # Ver Atenuación de SNR y ancho de lóbulo principal
 
 # %%
@@ -1152,10 +1153,8 @@ print('Se observa que el filtrado del ruido tiene mayor eficacia para el ruido d
 
 #Ejercicio 13
 
-pref = 0.00002
-
-f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=80)
-Zxx1_mag = np.abs(20*np.log10(Zxx1/pref))
+f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=7000)
+Zxx1_mag = 20 * np.log10(np.abs(Zxx1))
 Zxx1_phase = np.angle(Zxx1)
 #Grafico magnitud en dB
 plt.figure(1)
@@ -1163,7 +1162,7 @@ plt.pcolormesh(t1, f1, Zxx1_mag)
 plt.title("Magnitud con ventana Hann")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
-#plt.ylim(0,2500)
+plt.ylim(0,2500)
 #Grafico fase
 plt.figure(2)
 plt.pcolormesh(t1, f1, Zxx1_phase)
@@ -1172,8 +1171,8 @@ plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
 
-f2, t2, Zxx2 = sig.stft(A, fs, window=blackMan, nperseg=len(blackMan))
-Zxx2_mag = np.abs(20*np.log10(Zxx2/pref))
+f2, t2, Zxx2 = sig.stft(A, fs, window='blackman', nperseg=6000)
+Zxx2_mag = 20 * np.log10(np.abs(Zxx2))
 Zxx2_phase = np.angle(Zxx2)
 #Grafico magnitud en dB
 plt.figure(3)
@@ -1189,8 +1188,8 @@ plt.title("Fase con ventana Blackman")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
-f3, t3, Zxx3 = sig.stft(A, fs, window=w, nperseg=len(w))
-Zxx3_mag = np.abs(20*np.log10(Zxx3/pref))
+f3, t3, Zxx3 = sig.stft(A, fs, window='boxcar', nperseg=2000)
+Zxx3_mag = 20 * np.log10(np.abs(Zxx3))
 Zxx3_phase = np.angle(Zxx3)
 #Grafico magnitud en dB
 plt.figure(5)
@@ -1207,24 +1206,3 @@ plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
 plt.show()
-
-
-"""
-#Con el codigo que uso nahue en la clase
-import librosa.display
-M = 1000
-hop = 512
-
-A_stft = librosa.core.stft(A, hop_length=hop, n_fft=M)
-spectogram_A = np.abs(A_stft)/np.max(np.abs(A_stft))
-
-fig_10 = plt.figure(figsize=(14,6))
-plt.subplot2grid(shape = (1,2), loc =(0,0))
-librosa.display.specshow(spectogram_A, sr=fs, hop_length=hop, y_axis="linear", x_axis="time")
-plt.title("Suma", fantsize=16)
-plt.xlabel("Tiempo [s]")
-plt.ylabel("Frecuencia [Hz]")
-plt.ylim(0,2500)
-plt.colorbar()
-plt.tight_layout()
-plt.show()"""
