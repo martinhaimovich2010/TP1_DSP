@@ -735,8 +735,8 @@ plt.show()
 #Genero las ventanas
 M = 1000
 w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
-hann = 0.5 - 0.5 * np.cos((2*np.pi*t)/M)
-blackMan = 0.42 - 0.5 * np.cos((2*np.pi*t)/(M-1)) + 0.08 * np.cos((4*np.pi*t)/(M-1)) 
+hann = np.append((0.5 - 0.5 * np.cos((2*np.pi*np.arange(M))/M))/(M) , np.zeros(len(t)-M))
+blackMan = np.append( (0.42 - 0.5 * np.cos((2*np.pi*np.arange(M))/(M-1)) + 0.08 * np.cos((4*np.pi*np.arange(M))/(M-1))) , np.zeros(len(t)-M) )
 
 #Multiplico las señales por la ventana rectangular
 A_w = A * w
@@ -866,20 +866,20 @@ plt.ylabel("Amplitud")
 #Convierto la magnitud de las transformadas en dB
 pref = 0.00002
 #Ventana rectangular
-A_w_dft_db = 20*np.log10(A_w_dft / pref)
-AX1_w_dft_db = 20*np.log10(AX1_w_dft / pref)
-AX2_w_dft_db = 20*np.log10(AX2_w_dft / pref)
-AX3_w_dft_db = 20*np.log10(AX3_w_dft / pref)
+A_w_dft_db = 20*np.log10(A_w_dft)
+AX1_w_dft_db = 20*np.log10(AX1_w_dft)
+AX2_w_dft_db = 20*np.log10(AX2_w_dft)
+AX3_w_dft_db = 20*np.log10(AX3_w_dft)
 #Ventana Hann
-A_h_dft_db = 20*np.log10(A_h_dft / pref)
-AX1_h_dft_db = 20*np.log10(AX1_h_dft / pref)
-AX2_h_dft_db = 20*np.log10(AX2_h_dft / pref)
-AX3_h_dft_db = 20*np.log10(AX3_h_dft / pref)
+A_h_dft_db = 20*np.log10(A_h_dft)
+AX1_h_dft_db = 20*np.log10(AX1_h_dft)
+AX2_h_dft_db = 20*np.log10(AX2_h_dft)
+AX3_h_dft_db = 20*np.log10(AX3_h_dft)
 #Ventana Blackman
-A_b_dft_db = 20*np.log10(A_b_dft / pref)
-AX1_b_dft_db = 20*np.log10(AX1_b_dft / pref)
-AX2_b_dft_db = 20*np.log10(AX2_b_dft / pref)
-AX3_b_dft_db = 20*np.log10(AX3_b_dft / pref)
+A_b_dft_db = 20*np.log10(A_b_dft)
+AX1_b_dft_db = 20*np.log10(AX1_b_dft)
+AX2_b_dft_db = 20*np.log10(AX2_b_dft)
+AX3_b_dft_db = 20*np.log10(AX3_b_dft)
 
 #Grafico las transformadas en escala logaritmica
 
@@ -953,6 +953,46 @@ plt.xlabel("Frecuencia [Hz]")
 plt.ylabel("dB")
 
 plt.show()
+
+# Transformadas de las ventanas en decibeles
+w_dft = rfft(w)
+hann_dft = rfft(hann)
+blackMan_dft = rfft(blackMan)
+
+hann_dft = hann_dft / np.amax(hann_dft)
+blackMan_dft = blackMan_dft / np.amax(blackMan_dft)
+
+w_dft_dB = 20*np.log10(np.abs(w_dft))
+hann_dft_dB = 20*np.log10(np.abs(hann_dft))
+blackMan_dft_dB = 20*np.log10(np.abs(blackMan_dft))
+
+# Grafico las transformadas
+plt.figure(figsize=(15,7))
+plt.plot(f,w_dft_dB, label='Rectangular')
+plt.plot(f,hann_dft_dB, label='Hann')
+plt.plot(f,blackMan_dft_dB, label='Blackman')
+plt.title('Respuesta en frecuencia Ventanas')
+plt.xlabel('Frecuencia')
+plt.ylabel('Amplitud [dB]')
+plt.xlim(0,250)
+plt.legend(loc='upper right', shadow=True)
+# plt.ylim(-50,0)
+
+plt.tight_layout()
+plt.show()
+
+def getLobeWidth(x, fs=44100):
+    for i in range(0,len(x)):
+        if x[i] < 0:
+            return ((i*fs)//(len(x)))
+
+w_lobewidth = getLobeWidth(w_dft)
+hann_lobewidth = getLobeWidth(hann_dft)
+blackMan_lobewidth = getLobeWidth(blackMan_dft)
+
+print(w_lobewidth)
+print(hann_lobewidth)
+print(blackMan_lobewidth)
 
 print("La DFT de la señal limpia del ejercicio 1 multiplicada por la ventana rectangular presenta cierto leaking, a diferencia de cuando es multiplicada por una ventana Hann o Blackman")
 print("Se puede ver el componente armonico de la señal original en las respectivas transformadas, pero en la señal ruidosa 1 y 3 multiplicadas con la ventana rectangular es menos legible")
