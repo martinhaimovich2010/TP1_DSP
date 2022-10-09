@@ -367,6 +367,8 @@ plt.ylim(-2,2)
 
 plt.show()
 
+print("Se puede concluir que la implementacion recursiva realiza los calculos en un tiempo mucho menor que la de implementacion directa")
+
 #%%
 #Ejercicio 6
 
@@ -405,6 +407,8 @@ plt.title("Señal filtrada ej 5")
 plt.tight_layout()
 plt.show()
 
+print("Se llega al mismo resultado tanto haciendo la convolucion como utilizando una de las funciones del ejercicio 5")
+
 #%%
 
 # Ejercicio 7
@@ -435,6 +439,8 @@ plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
 plt.tight_layout()
 plt.show()
+
+print("Se puede apreciar que el filtraje con la ventana Blackman es mucho mejor que el realizado en los ejercicios 5 y 6, dando una senoidal pura muy aproximada al primer armonico de la señal original")
 
 # %%
 
@@ -506,7 +512,8 @@ sf.write('Conv.wav',conv,fs)
 sf.write('Conv circular.wav',conv_circ,fs)
 sf.write('Circular (igual lineal).wav',circ_lin,fs)
 
-
+print("La señal convolucionada linealmente y la convolucionada circular con las mismas muestras que la lineal dan graficos identicos por lo que el calculo es coherente")
+print("Ademas se escucha en los archivos de audio a la misma señal del ejercicio 1 con una pequeña reverb producto de ser convolucionada con la respuesta al impulso de un recinto")
 # %%
 
 #Ejercicio 9
@@ -947,6 +954,10 @@ plt.ylabel("dB")
 
 plt.show()
 
+print("La DFT de la señal limpia del ejercicio 1 multiplicada por la ventana rectangular presenta cierto leaking, a diferencia de cuando es multiplicada por una ventana Hann o Blackman")
+print("Se puede ver el componente armonico de la señal original en las respectivas transformadas, pero en la señal ruidosa 1 y 3 multiplicadas con la ventana rectangular es menos legible")
+print("Multiplicando las señales originales con las ventanas de Hann y Blackman se pueden ver de forma mas notoria los armonicos de la señal del ejercicio 1")
+print("A medida que la desviacion estandar de la señal aumenta el ruido es mayor. Esto se puede ver comparando los graficos de las tres señales con ruido")
 # Ver Atenuación de SNR y ancho de lóbulo principal
 
 # %%
