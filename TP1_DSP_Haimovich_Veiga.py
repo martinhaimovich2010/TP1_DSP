@@ -566,15 +566,12 @@ import sounddevice as sd
 
 #Importo archivo de audio y lo guardo en variable respuesta al impulso h
 h, fs = sf.read('Resp_Imp.wav')
-th = np.linspace(0, 2, len(h))
-plt.figure(figsize=(25,15))
-plt.plot(th, h)
 
 #Defino funciones a utilizar
 from conv_circular import circular_convolve, _periodic_summation
 
 #Convolucion lineal
-conv = sig.convolve(A, h, mode='full')
+conv = sig.fftconvolve(A, h, mode='full')
 conv = conv / np.amax(conv)
 
 #Convolucion circular
@@ -626,6 +623,7 @@ sf.write('Circular (igual lineal).wav',circ_lin,fs)
 
 print("La señal convolucionada linealmente y la convolucionada circular con las mismas muestras que la lineal dan graficos identicos por lo que el calculo es coherente")
 print("Ademas se escucha en los archivos de audio a la misma señal del ejercicio 1 con una pequeña reverb producto de ser convolucionada con la respuesta al impulso de un recinto")
+print("Se puede ver en los graficos que la convolucion circular tiene menos muestras que las demas convoluciones")
 # %%
 
 #Ejercicio 9
