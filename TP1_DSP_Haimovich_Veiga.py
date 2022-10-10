@@ -1113,7 +1113,7 @@ print('Se observa que el filtrado del ruido tiene mayor eficacia para el ruido d
 
 #Ejercicio 13
 
-f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=7000)
+f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=4000)
 Zxx1_mag = 20 * np.log10(np.abs(Zxx1))
 Zxx1_phase = np.angle(Zxx1)
 #Grafico magnitud en dB
@@ -1131,7 +1131,7 @@ plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
 
-f2, t2, Zxx2 = sig.stft(A, fs, window='blackman', nperseg=6000)
+f2, t2, Zxx2 = sig.stft(A, fs, window='blackman', nperseg=10000)
 Zxx2_mag = 20 * np.log10(np.abs(Zxx2))
 Zxx2_phase = np.angle(Zxx2)
 #Grafico magnitud en dB
@@ -1148,7 +1148,7 @@ plt.title("Fase con ventana Blackman")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
-f3, t3, Zxx3 = sig.stft(A, fs, window='boxcar', nperseg=2000)
+f3, t3, Zxx3 = sig.stft(A, fs, window='boxcar', nperseg=10000)
 Zxx3_mag = 20 * np.log10(np.abs(Zxx3))
 Zxx3_phase = np.angle(Zxx3)
 #Grafico magnitud en dB
@@ -1166,3 +1166,13 @@ plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
 plt.show()
+
+print("La transformada mas representativa es la de la señal multiplicada por la ventana rectangular, ya que logra una representacion mas fina a la hora de detectar las frecuencias de la señal original")
+print("Y la amplitud maxima es en la fundamental, luego los armonicos se ven atenuados levemente como ocurre en la señal original. Esto no ocurre con las otras ventanas")
+print("Ya que los 5 armonicos tienen la misma amplitud")
+print("Otra transformada que puede llegar a ser util es la de la señal multiplicada por la ventana blackman, ya que atenua mucho mas la informacion innecesaria que hay entre un armonico y otro, pero es menos selectivo")
+print("y genera informacion de tipo impulso al principio y al final del intervalo de tiempo definido")
+print("La multiplicada por la ventana Hann es la peor de las 3 ya que no es tan selectiva como la rectangular y no atenua tanto el intervalo de frecuencias entre dos armonicos como la Blackman")
+print("Ademas la Hann tambien genera informacion tipo impulso al principio y al final del intervalo de tiempo")
+print("Con lo que respecta al ancho de la ventana rectangular, entre las 2000 y 10000 muestras por segundo se logra una optima representacion de la transformada")
+print("Y el ancho de la ventana Blackman, deberia estar entre las 5000 y 10000 muestras por segundo")
