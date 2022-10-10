@@ -575,18 +575,10 @@ conv = sig.fftconvolve(A, h, mode='full')
 conv = conv / np.amax(conv)
 
 #Convolucion circular
-#Usando funcion suma periodica igualo las longitudes de las 2 señales
-#in1 = _periodic_summation(A, len(h))
-#in2 = _periodic_summation(h, len(h))
-#Convolucion
 conv_circ = circular_convolve(A, h, len(h))
 conv_circ = conv_circ / np.amax(conv_circ)
 
 #Convolucion lineal mismo periodo que la circular
-#Usando funcion suma periodica llevo las longitudes a la longitud de la convolucion lineal
-#in1 = _periodic_summation(A, len(conv))
-#in2 = _periodic_summation(h, len(conv))
-#Convolucion
 circ_lin = circular_convolve(A, h, len(conv))
 circ_lin = circ_lin / np.amax(circ_lin)
 
@@ -923,33 +915,18 @@ A_w_dft = np.abs(rfft(A_w))
 AX1_w_dft = np.abs(rfft(AX1_w))
 AX2_w_dft = np.abs(rfft(AX2_w))
 AX3_w_dft = np.abs(rfft(AX3_w))
-#Normalizo
-# A_w_dft = A_w_dft / np.amax(A_w_dft)
-# AX1_w_dft = AX1_w_dft / np.amax(AX1_w_dft)
-# AX2_w_dft = AX2_w_dft / np.amax(AX2_w_dft)
-# AX3_w_dft = AX3_w_dft / np.amax(AX3_w_dft)
 
 #Hago la DFT de las señales multiplicadas por la ventana de Hann
 A_h_dft = np.abs(rfft(A_h))
 AX1_h_dft = np.abs(rfft(AX1_h))
 AX2_h_dft = np.abs(rfft(AX2_h))
 AX3_h_dft = np.abs(rfft(AX3_h))
-#Normalizo
-# A_h_dft = A_h_dft / np.amax(A_h_dft)
-# AX1_h_dft = AX1_h_dft / np.amax(AX1_h_dft)
-# AX2_h_dft = AX2_h_dft / np.amax(AX2_h_dft)
-# AX3_h_dft = AX3_h_dft / np.amax(AX3_h_dft)
 
 #Hago la DFT de las señales multiplicadas por la ventana de Blackman
 A_b_dft = np.abs(rfft(A_b))
 AX1_b_dft = np.abs(rfft(AX1_b))
 AX2_b_dft = np.abs(rfft(AX2_b))
 AX3_b_dft = np.abs(rfft(AX3_b))
-#Normalizo
-# A_b_dft = A_b_dft / np.amax(A_b_dft)
-# AX1_b_dft = AX1_b_dft / np.amax(AX1_b_dft)
-# AX2_b_dft = AX2_b_dft / np.amax(AX2_b_dft)
-# AX3_b_dft = AX3_b_dft / np.amax(AX3_b_dft)
 
 #Creo vector de frecuencias para graficar las DFTs
 f = np.arange(0, fs//2, (fs//2)/len(A_w_dft)) 
@@ -1170,7 +1147,6 @@ print("A medida que la desviacion estandar de la señal aumenta el ruido es mayo
 
 # Ejercicio 12
 
-pref = 0.00002
 f = np.arange(0, fs//2, (fs//2)/len(A_w_dft))
 
 # Se genera una función para calcular la reducción en dB de un filtro de media móvil de ventana M para una frecuencia dada
