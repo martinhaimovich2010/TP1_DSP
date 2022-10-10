@@ -99,7 +99,7 @@ for i in arrayTabla:
     averageArray.append(average)
     ds, error = desvio_estandar(average, signal)
     dsArray.append(ds)
-    errorArray.append(error)
+    errorArray.append(np.abs(error))
 
 # Grafico en tabla
 DC_SNR_layout = go.Layout(
@@ -299,7 +299,7 @@ fig = go.Figure(data=[go.Table(header=dict(values=['Cantidad de señales de ruid
                 layout=DC_SNR_layout)
 fig.show()
 
-# Justificar elección de M
+print('Se observa que para mayor cantidad de señales, mayor será el SNR del promedio.')
 
 # %%
 
@@ -316,6 +316,50 @@ def mediaMovilD(x, M):
             y[i] += x[i+j]
         y[i] = y[i] / M
     return y
+
+# Definición de ventana
+# Se genera una función para calcular la reducción de un filtro de media móvil de ventana M para una frecuencia dada
+
+def response_MA_f (x ,M, f, fs=44100, pref=0.00002):
+
+    # Creo sinusoide de frecuencia buscada y aplico filtro MA de ancho M
+    sig = np.sin(2*np.arange(len(x))*np.pi*(f/fs))
+
+    MA = mediamovildr(sig, M)
+
+    # Respuesta para la frecuencia buscada
+    res = np.amax(MA)/np.amax(sig)
+
+    return res
+
+# Se busca mediante iteración y comparación un número de muestras de la ventana que permita una atenuación de al menos el 10% en 880 Hz. Al ser un filtro pasabajos, si atenúa un 90% en 880 Hz, es razonable asumir una reducción similar en los armónicos mayores.
+
+def M_for_response(x,f,response,fs=44100, pref=0.00002):
+    for i in range(1,fs//2):
+        res = response_MA_f(x,i,f)
+        if res < response:
+            M_for_R = i
+            break
+    return M_for_R
+
+M_minus90_AX1 = M_for_response(AX1,880, 0.1)
+M_minus90_AX2 = M_for_response(AX2,880, 0.1)
+M_minus90_AX3 = M_for_response(AX3,880, 0.1)
+
+print(M_minus90_AX1)
+print(M_minus90_AX2)
+print(M_minus90_AX3)
+
+
+print(response_MA_f(AX1,47,440*3))
+print(response_MA_f(AX2,47,440*3))
+print(response_MA_f(AX3,47,440*3))
+print(response_MA_f(AX1,47,440*4))
+print(response_MA_f(AX2,47,440*4))
+print(response_MA_f(AX3,47,440*4))
+print(response_MA_f(AX1,47,440*5))
+print(response_MA_f(AX2,47,440*5))
+print(response_MA_f(AX3,47,440*5))
 
 inicio = time.time()
 filtranding = mediaMovilD(A, 40)
@@ -1157,14 +1201,15 @@ f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=7000)
 Zxx1_mag = 20 * np.log10(np.abs(Zxx1))
 Zxx1_phase = np.angle(Zxx1)
 #Grafico magnitud en dB
-plt.figure(1)
+plt.figure(1, figsize=(17,9))
+plt.subplot(231)
 plt.pcolormesh(t1, f1, Zxx1_mag)
 plt.title("Magnitud con ventana Hann")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 plt.ylim(0,2500)
 #Grafico fase
-plt.figure(2)
+plt.subplot(234)
 plt.pcolormesh(t1, f1, Zxx1_phase)
 plt.title("Fase con ventana Hann")
 plt.xlabel("Tiempo")
@@ -1175,14 +1220,14 @@ f2, t2, Zxx2 = sig.stft(A, fs, window='blackman', nperseg=6000)
 Zxx2_mag = 20 * np.log10(np.abs(Zxx2))
 Zxx2_phase = np.angle(Zxx2)
 #Grafico magnitud en dB
-plt.figure(3)
+plt.subplot(232)
 plt.pcolormesh(t2, f2, Zxx2_mag)
 plt.title("Magnitud con ventana Blackman")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 plt.ylim(0,2500)
 #Grafico fase
-plt.figure(4)
+plt.subplot(235)
 plt.pcolormesh(t2, f2, Zxx2_phase)
 plt.title("Fase con ventana Blackman")
 plt.xlabel("Tiempo")
@@ -1192,17 +1237,18 @@ f3, t3, Zxx3 = sig.stft(A, fs, window='boxcar', nperseg=2000)
 Zxx3_mag = 20 * np.log10(np.abs(Zxx3))
 Zxx3_phase = np.angle(Zxx3)
 #Grafico magnitud en dB
-plt.figure(5)
+plt.subplot(233)
 plt.pcolormesh(t3, f3, Zxx3_mag)
 plt.title("Magnitud con ventana rectangular")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 plt.ylim(0,2500)
 #Grafico fase
-plt.figure(6)
+plt.subplot(236)
 plt.pcolormesh(t3, f3, Zxx3_phase)
 plt.title("Fase con ventana rectangular")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
+plt.tight_layout()
 plt.show()
