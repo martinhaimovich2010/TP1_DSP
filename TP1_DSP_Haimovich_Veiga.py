@@ -716,6 +716,8 @@ plt.subplot(1,3,3)
 plt.title('STE Signal 3')
 plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(STE3)), np.array(STE3))
+
+plt.tight_layout()
 plt.show()
 
 ZCR1 = zeroCrossingRate(1000, signal1, 500)
@@ -735,6 +737,8 @@ plt.subplot(1,3,3)
 plt.title('ZCR Signal 3')
 plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(ZCR3)), np.array(ZCR3))
+
+plt.tight_layout()
 plt.show()
 
 ENEN1 = energyEntropy(1000, signal1, 200, 500)
@@ -754,6 +758,8 @@ plt.subplot(1,3,3)
 plt.title('Energy Entropy Signal 3')
 plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(ENEN3)), np.array(ENEN3))
+
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -837,6 +843,8 @@ plt.subplot(1,3,3)
 plt.title('Spectral Centroid Signal 3')
 plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(SC3)), np.array(SC3))
+
+plt.tight_layout()
 plt.show()
 
 SF1 = spectralFlux(1000, signal1, 500)
@@ -856,6 +864,8 @@ plt.subplot(1,3,3)
 plt.title('Spectral Flux Signal 3')
 plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(SF3)), np.array(SF3))
+
+plt.tight_layout()
 plt.show()
 
 SROff1 = spectralRolloff(1000, signal1, 500, 0.9)
@@ -875,6 +885,8 @@ plt.subplot(1,3,3)
 plt.title('Spectral Rolloff Signal 3')
 plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(SROff3)), np.array(SROff3))
+
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -1013,6 +1025,9 @@ plt.title("DFT señal ruidosa 3 con Blackman")
 plt.xlabel("Frecuencia [Hz]")
 plt.ylabel("Amplitud")
 
+plt.tight_layout()
+plt.show()
+
 #Convierto la magnitud de las transformadas en dB
 #Ventana rectangular
 A_w_dft_db = 20*np.log10(A_w_dft)
@@ -1099,6 +1114,7 @@ plt.plot(f, abs(AX3_b_dft_db))
 plt.title("DFT señal ruidosa 3 con Blackman")
 plt.xlabel("Frecuencia [Hz]")
 plt.ylabel("dB")
+
 plt.tight_layout()
 plt.show()
 
@@ -1108,6 +1124,7 @@ w_dft = rfft(w)
 hann_dft = rfft(hann)
 blackMan_dft = rfft(blackMan)
 
+w_dft = w_dft / np.amax(w_dft)
 hann_dft = hann_dft / np.amax(hann_dft)
 blackMan_dft = blackMan_dft / np.amax(blackMan_dft)
 
@@ -1128,6 +1145,8 @@ plt.legend(loc='upper right', shadow=True)
 
 plt.tight_layout()
 plt.show()
+
+# Defino función para obtener ancho del lóbulo principal y lo calculo para cada ventana.
 
 def getLobeWidth(x, fs=44100):
     for i in range(1,len(x)):
@@ -1219,7 +1238,7 @@ AX3_fft = AX3_fft / np.amax(AX3_fft)
 
 (880*2*len(AX1_filt880))//fs
 
-plt.figure(figsize=(10,7))
+plt.figure(22,figsize=(15,7))
 plt.subplot(2,2,1)
 plt.title('Respuesta en frecuencia de filtro MA')
 plt.xlabel('Frecuencia')
