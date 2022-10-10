@@ -110,11 +110,11 @@ DC_SNR_layout = go.Layout(
     )
 )
 
-fig = go.Figure(data=[go.Table(header=dict(values=['L [muestras]', ' Desv. Estándar', 'Error [%]'],align='center'),
+fig2 = go.Figure(data=[go.Table(header=dict(values=['L [muestras]', ' Desv. Estándar', 'Error [%]'],align='center'),
                 cells=dict(values=[np.array(arrayTabla).astype(str), np.around(dsArray, 2), np.around(errorArray,2)],align='center'))
                 ],
                 layout=DC_SNR_layout)
-fig.show()
+fig2.show()
 
 print("Se puede ver que a medida que la señal aleatoria aumenta su dimensión, el desvío estandar tiende a 1, con un error cada vez menor, aproximandose al caso ideal de distribucion normal")
 
@@ -218,11 +218,11 @@ DC_SNR_layout = go.Layout(
     )
 )
 
-fig = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Desv. Estándar', 'SNR', 'SNR con DC=-10', 'SNR con DC=10', 'SNR con DC=1000'],align='center'),
+fig4 = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Desv. Estándar', 'SNR', 'SNR con DC=-10', 'SNR con DC=10', 'SNR con DC=1000'],align='center'),
                 cells=dict(values=[["Señal 1", "Señal 2", "Señal 3"], [sigma1, sigma2, sigma3] , [SNR1, SNR2, SNR3], [SNR4, SNR5, SNR6], [SNR7, SNR8, SNR9], [SNR10, SNR11, SNR12]],align='center'))
                 ],
                 layout=DC_SNR_layout)
-fig.show()
+fig4.show()
 
 print("A medida que el desvio estandar es menor, la relacion señal ruido aumenta, este resultado es coherente con la formula planteada.")
 print("El SNR no se modifica con la adición de una componente de continua.") 
@@ -293,11 +293,11 @@ DC_SNR_layout = go.Layout(
     )
 )
 
-fig = go.Figure(data=[go.Table(header=dict(values=['Cantidad de señales de ruido', 'SNR promedio', 'SNR ejercicio 3'],align='center'),
+fig6 = go.Figure(data=[go.Table(header=dict(values=['Cantidad de señales de ruido', 'SNR promedio', 'SNR ejercicio 3'],align='center'),
                 cells=dict(values=[["10", "100", "1000"], [SNR_average10, SNR_average100, SNR_average1000], [SNR1, SNR2, SNR3]],align='center'))
                 ],
                 layout=DC_SNR_layout)
-fig.show()
+fig6.show()
 
 print('Se observa que para mayor cantidad de señales, mayor será el SNR del promedio.')
 
@@ -334,7 +334,7 @@ def mediamovildr(x,M):
         for i in range((M//2)+1,(len(y)-(M//2))):
             acc = acc + x[i+((M-1)//2)]-x[i-(((M-1)//2)+1)]
             y[i] = acc/M
-        return y # Esta normalización y desplazamiento deberían solucionarse de otra forma.
+        return y
     else:
         s=len(x)-M
         return np.hstack([np.zeros(M-1),np.mean(x[s:s+M-1])])
@@ -376,13 +376,28 @@ M_minus90_AX1 = M_for_response(AX1,[880, 1320, 1760, 2200], 0.1)
 print("Largo de Ventana MA para atenuar 90%:", M_minus90_AX1)
 
 # Se chequea que se cumpla la atenuación para todos los armónicos
-print('Atenuación por MA en 440 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440)))
-print('Atenuación por MA en 880 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440*2)))
-print('Atenuación por MA en 1320 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440*3)))
-print('Atenuación por MA en 1760 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440*4)))
-print('Atenuación por MA en 2200 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440*5)))
 
-# Son todos menores a 0.1, pero 440 Hz también se encuentra atenuado en casi un 90%, por lo cual no sería la condición buscada.
+att_MA_440 = np.round(100*(1-response_MA_f(AX1,M_minus90_AX1,440)),2)
+att_MA_880 = np.round(100*(1-response_MA_f(AX1,M_minus90_AX1,440*2)),2)
+att_MA_1320 = np.round(100*(1-response_MA_f(AX1,M_minus90_AX1,440*3)),2)
+att_MA_1760 = np.round(100*(1-response_MA_f(AX1,M_minus90_AX1,440*4)),2)
+att_MA_2200 = np.round(100*(1-response_MA_f(AX1,M_minus90_AX1,440*5)),2)
+
+DC_SNR_layout = go.Layout(
+    title='Atenuación por MA de M=%i según frecuencia' %M_minus90_AX1,
+    title_x=0.5,
+    margin=go.layout.Margin(
+        autoexpand=True
+    )
+)
+
+fig7 = go.Figure(data=[go.Table(header=dict(values=['Frecuencia', 'Atenuación [%]'],align='center'),
+                cells=dict(values=[['440 Hz:','880 Hz:','1320 Hz:','1760 Hz:','2200 Hz:'], [att_MA_440, att_MA_880, att_MA_1320, att_MA_1760, att_MA_2200]],align='center'))
+                ],
+                layout=DC_SNR_layout)
+fig7.show()
+
+print('Son todos menores a 0.1, pero 440 Hz también se encuentra atenuado en casi un 90%, por lo cual no sería la condición buscada.')
 
 # Se busca entonces filtrar las frecuencias mayores a 880 Hz en un 90% en promedio.
 
@@ -396,29 +411,49 @@ def M_for_response_f(x,f,response,fs=44100, pref=0.00002):
             break
     return M_for_R
 
-M_880minus90_AX1 = M_for_response_f(AX1,[880, 1320, 1760, 2200], 0.1)
+M_minus90_avg = M_for_response_f(AX1,[880, 1320, 1760, 2200], 0.1)
 
-print("Largo de Ventana MA para atenuar 90% en promedio:", M_880minus90_AX1)
+print("Largo de Ventana MA para atenuar 90% en promedio:", M_minus90_avg)
 
 # Se chequea que se cumpla la atenuación para todos los armónicos
-print('Atenuación por MA en 440 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440)),'%')
-print('Atenuación por MA en 880 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440*2)),'%')
-print('Atenuación por MA en 1320 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440*3)),'%')
-print('Atenuación por MA en 1760 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440*4)),'%')
-print('Atenuación por MA en 2200 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440*5)),'%')
+att_MA_avg_440 = np.round(100*(1-response_MA_f(AX1,M_minus90_avg,440)),2)
+att_MA_avg_880 = np.round(100*(1-response_MA_f(AX1,M_minus90_avg,440*2)),2)
+att_MA_avg_1320 = np.round(100*(1-response_MA_f(AX1,M_minus90_avg,440*3)),2)
+att_MA_avg_1760 = np.round(100*(1-response_MA_f(AX1,M_minus90_avg,440*4)),2)
+att_MA_avg_2200 = np.round(100*(1-response_MA_f(AX1,M_minus90_avg,440*5)),2)
 
-# En este caso se logra filtrar los armónicos mayores manteniendo un 65% de la frecuencia fundamental, por lo cual resulta apropiado como largo de la ventana para el filtro.
-# El valor de 49 muestras resulta lógico, ya que es cercano al número de muestras por cada período de la frecuencia de 880 Hz (44100/440 = 50 muestras aprox.), lo cual significa que cada ciclo de esa frecuencia está siendo prácticamente eliminado al promediarse. Los otros armónicos tienen períodos de 33, 25 y 20 muestras, lo cual implica que el de 25, al entrar 2 veces en 50, tendrá una atenuación similar al de 50 muestras, mientras que los otros dos no tendrán tanta atenuación, lo cual se observa en los resultados anteriores.
+DC_SNR_layout = go.Layout(
+    title='Atenuación por MA de M=%i según frecuencia' %M_minus90_avg,
+    title_x=0.5,
+    margin=go.layout.Margin(
+        autoexpand=True
+    )
+)
+
+fig8 = go.Figure(data=[go.Table(header=dict(values=['Frecuencia', 'Atenuación [%]'],align='center'),
+                cells=dict(values=[['440 Hz:','880 Hz:','1320 Hz:','1760 Hz:','2200 Hz:'], [att_MA_avg_440, att_MA_avg_880, att_MA_avg_1320, att_MA_avg_1760, att_MA_avg_2200]],align='center'))
+                ],
+                layout=DC_SNR_layout)
+fig8.show()
 
 
+
+
+print('En este caso se logra filtrar los armónicos mayores manteniendo un 65% de la frecuencia fundamental, por lo cual resulta apropiado como largo de la ventana para el filtro.')
+print('El valor de 49 muestras resulta lógico, ya que es cercano al número de muestras por cada período de la frecuencia de 880 Hz (44100/440 = 50 muestras aprox.), lo cual significa que cada ciclo de esa frecuencia está siendo prácticamente eliminado al promediarse. Los otros armónicos tienen períodos de 33, 25 y 20 muestras, lo cual implica que el de 25, al entrar 2 veces en 50, tendrá una atenuación similar al de 50 muestras, mientras que los otros dos no tendrán tanta atenuación, lo cual se observa en los resultados anteriores.')
+
+
+# Implementación de filtros con ventana elegida y medición del tiempo de ejecución
+
+# Implementación directa
 inicio = time.time()
-filtranding = mediaMovilD(A, 49)
+filtranding = mediaMovilD(A, M_minus90_avg)
 final = time.time()
 tiempo = final-inicio
 print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
 
-plt.figure(6)
-plt.plot(t[20:], filtranding[20:])
+plt.figure(9, figsize=(15,7))
+plt.plot(t[M_minus90_avg//2:], filtranding[M_minus90_avg//2:])
 plt.title('Señal filtrada con filtro MA, M=49')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Amplitud')
@@ -428,14 +463,15 @@ plt.ylim(-2,2)
 plt.tight_layout()
 plt.show()
 
+# Implementación recursiva
 inicio = time.time()
-xfr = mediamovildr(A,49)
+xfr = mediamovildr(A,M_minus90_avg)
 final = time.time()
 tiempo = final-inicio
 print("El tiempo que tarda el filtro de implementación recursiva en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
 
-plt.figure(7)
-plt.plot(t[20:], xfr[20:])
+plt.figure(10, figsize=(15,7))
+plt.plot(t[M_minus90_avg//2:], xfr[M_minus90_avg//2:])
 plt.title('Señal filtrada con filtro MA, M=49, Implementación recursiva')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Amplitud')
@@ -449,7 +485,7 @@ print("Se puede concluir que la implementacion recursiva realiza los calculos en
 #%%
 #Ejercicio 6
 
-M = 40
+M = 50
 
 w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
 #Hago la convolucion entre la ventana y la señal
@@ -457,7 +493,7 @@ h = sig.convolve(A, w, mode='full')
 h = h / np.amax(h)
 
    
-plt.figure(8, figsize=(15,7))
+plt.figure(11, figsize=(15,5))
 
 #Grafico la convolucion entre w y la señal del ejercicio 1
 plt.subplot(1,2,1)
@@ -471,7 +507,7 @@ plt.title("Señal filtrada por convolucion")
 #Grafico la señal filtrada del ejercicio 5
 plt.subplot(1,2,2)
 # Usando implementación recursiva
-filtranding = mediamovildr(A, 40)
+filtranding = mediamovildr(A, M)
 # Normalizo
 filtranding = filtranding / np.amax(filtranding)
 plt.plot(t, filtranding)
@@ -484,13 +520,13 @@ plt.title("Señal filtrada ej 5")
 plt.tight_layout()
 plt.show()
 
-print("Se llega al mismo resultado tanto haciendo la convolucion como utilizando una de las funciones del ejercicio 5")
+print("Se llega al mismo resultado tanto haciendo la convolucion como utilizando una de las funciones del ejercicio 5. Sólo se observa una diferencia en el comienzo de la señal, relacionado a cómo el algoritmo sig. convolve maneja las muestras iniciales.")
 
 #%%
 
 # Ejercicio 7
 
-M = 100
+M = 50
 
 a0 = 0.42
 a1 = 0.5
@@ -509,9 +545,10 @@ convBlackStart = ( (len(convBlack)-len(t)) // 2 )
 convBlackEnd = ( (len(convBlack)+len(t)) // 2 )
 
 #Grafico
-plt.figure(9)
+plt.figure(12, figsize=(15,7))
 plt.plot(t, convBlack[0:len(t)])
 plt.xlim(0.0031, 8/f0)
+plt.title('Señal filtrada con ventana de Blackman (M=50)')
 plt.xlabel("Tiempo")
 plt.ylabel("Amplitud")
 plt.tight_layout()
@@ -564,24 +601,22 @@ t2 = np.linspace(0,2,len(conv_circ))
 t3 = np.linspace(0,2,len(circ_lin))
 
 #Grafico convolucion lineal
-plt.figure(figsize=(25,15))
+plt.figure(13, figsize=(25,15))
 plt.subplot(2,2,1)
 plt.plot(t1, conv)
-#plt.xlim(0, 0.25)
 plt.title("Convolucion lineal")
 
 #Grafico convolucion circular
 plt.subplot(2,2,2)
 plt.plot(t2, conv_circ)
-#plt.xlim(0, 0.25)
 plt.title("Convolucion circular")
 
 #Grafico convolucion circular de misma longitud que la lineal
 plt.subplot(2,2,3)
 plt.plot(t3, circ_lin)
-#plt.xlim(0, 0.25)
 plt.title("Conv circular (misma long que conv lineal)")
 
+plt.tight_layout()
 plt.show()
 
 #Genero audios de las señales convolucionadas
