@@ -308,7 +308,12 @@ print('Se observa que para mayor cantidad de señales, mayor será el SNR del pr
 from scipy import fftpack
 import time
 
+# Definición de funciones
+# Directa
+
 def mediaMovilD(x, M):
+    if len(x)<M:
+        raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
     y = np.zeros(len(x))
     for i in range(M//2, len(x) - M//2):
         y[i] = 0.0
@@ -317,67 +322,7 @@ def mediaMovilD(x, M):
         y[i] = y[i] / M
     return y
 
-# Definición de ventana
-# Se genera una función para calcular la reducción de un filtro de media móvil de ventana M para una frecuencia dada
-
-def response_MA_f (x ,M, f, fs=44100, pref=0.00002):
-
-    # Creo sinusoide de frecuencia buscada y aplico filtro MA de ancho M
-    sig = np.sin(2*np.arange(len(x))*np.pi*(f/fs))
-
-    MA = mediamovildr(sig, M)
-
-    # Respuesta para la frecuencia buscada
-    res = np.amax(MA)/np.amax(sig)
-
-    return res
-
-# Se busca mediante iteración y comparación un número de muestras de la ventana que permita una atenuación de al menos el 10% en 880 Hz. Al ser un filtro pasabajos, si atenúa un 90% en 880 Hz, es razonable asumir una reducción similar en los armónicos mayores.
-
-def M_for_response(x,f,response,fs=44100, pref=0.00002):
-    for i in range(1,fs//2):
-        res = response_MA_f(x,i,f)
-        if res < response:
-            M_for_R = i
-            break
-    return M_for_R
-
-M_minus90_AX1 = M_for_response(AX1,880, 0.1)
-M_minus90_AX2 = M_for_response(AX2,880, 0.1)
-M_minus90_AX3 = M_for_response(AX3,880, 0.1)
-
-print(M_minus90_AX1)
-print(M_minus90_AX2)
-print(M_minus90_AX3)
-
-
-print(response_MA_f(AX1,47,440*3))
-print(response_MA_f(AX2,47,440*3))
-print(response_MA_f(AX3,47,440*3))
-print(response_MA_f(AX1,47,440*4))
-print(response_MA_f(AX2,47,440*4))
-print(response_MA_f(AX3,47,440*4))
-print(response_MA_f(AX1,47,440*5))
-print(response_MA_f(AX2,47,440*5))
-print(response_MA_f(AX3,47,440*5))
-
-inicio = time.time()
-filtranding = mediaMovilD(A, 40)
-final = time.time()
-tiempo = final-inicio
-print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
-
-plt.figure(6)
-plt.plot(t[20:], filtranding[20:])
-plt.title('Señal filtrada con filtro MA, M=40')
-plt.xlabel('Tiempo [s]')
-plt.ylabel('Amplitud')
-plt.xlim(0, 8/f0)
-plt.ylim(-2,2)
-
-plt.tight_layout()
-plt.show()
-
+# Recursiva
 def mediamovildr(x,M):
     if len(x)<M:
         raise Exception('La ventana no debe tener más muestras que la señal a filtrar')
@@ -395,8 +340,120 @@ def mediamovildr(x,M):
         s=len(x)-M
         return np.hstack([np.zeros(M-1),np.mean(x[s:s+M-1])])
 
+# Definición de ventana
+# Se genera una función para calcular la reducción de un filtro de media móvil de ventana M para una frecuencia dada
+
+def response_MA_f (x ,M, f, fs=44100, pref=0.00002):
+
+    # Creo sinusoide de frecuencia buscada y aplico filtro MA de ancho M
+    sig = np.sin(2*np.arange(len(x))*np.pi*(f/fs))
+
+    MA = mediamovildr(sig, M)
+
+    # Respuesta para la frecuencia buscada
+    res = np.amax(MA)/np.amax(sig)
+
+    return res
+
+# Se busca mediante iteración y comparación un número de muestras de la ventana que permita una atenuación de al menos el 90% en 880 Hz y frecuencias superiores.
+
+def M_for_response(x,f,response,fs=44100, pref=0.00002):
+    for i in range(1,fs//2):
+        res = np.zeros(len(f))
+        flag = 0
+        for j in range(len(f)):    
+            res[j] = response_MA_f(x,i,f[j])
+            if res[j] < response:
+                flag += 1
+        if flag == len(f):
+            M_for_R = i
+            break
+    return M_for_R
+
+M_minus90_AX1 = M_for_response(AX1,[880, 1320, 1760, 2200], 0.1)
+M_minus90_AX2 = M_for_response(AX2,[880, 1320, 1760, 2200], 0.1)
+M_minus90_AX3 = M_for_response(AX3,[880, 1320, 1760, 2200], 0.1)
+
+print(M_minus90_AX1)
+print(M_minus90_AX2)
+print(M_minus90_AX3)
+
+# Se chequea que se cumpla la atenuación para todos los armónicos
+print(response_MA_f(AX1,M_minus90_AX1,440))
+print(response_MA_f(AX2,M_minus90_AX2,440))
+print(response_MA_f(AX3,M_minus90_AX3,440))
+print(response_MA_f(AX1,M_minus90_AX1,440*2))
+print(response_MA_f(AX2,M_minus90_AX2,440*2))
+print(response_MA_f(AX3,M_minus90_AX3,440*2))
+print(response_MA_f(AX1,M_minus90_AX1,440*3))
+print(response_MA_f(AX2,M_minus90_AX2,440*3))
+print(response_MA_f(AX3,M_minus90_AX3,440*3))
+print(response_MA_f(AX1,M_minus90_AX1,440*4))
+print(response_MA_f(AX2,M_minus90_AX2,440*4))
+print(response_MA_f(AX3,M_minus90_AX3,440*4))
+print(response_MA_f(AX1,M_minus90_AX1,440*5))
+print(response_MA_f(AX2,M_minus90_AX2,440*5))
+print(response_MA_f(AX3,M_minus90_AX3,440*5))
+
+# Son todos menores a 0.1, pero 440 Hz también se encuentra atenuado en casi un 90%, por lo cual no sería la condición buscada.
+
+# Se busca entonces sólo filtrar la frecuencia de 880 Hz en un 90%.
+
+def M_for_response_f(x,f,response,fs=44100, pref=0.00002):
+    for i in range(1,fs//2):   
+        res = response_MA_f(x,i,f)
+        if res < response:
+            M_for_R = i
+            break
+    return M_for_R
+
+M_880minus90_AX1 = M_for_response_f(AX1,880, 0.1)
+M_880minus90_AX2 = M_for_response_f(AX2,880, 0.1)
+M_880minus90_AX3 = M_for_response_f(AX3,880, 0.1)
+
+print(M_880minus90_AX1)
+print(M_880minus90_AX2)
+print(M_880minus90_AX3)
+
+# Se chequea que se cumpla la atenuación para todos los armónicos
+print(response_MA_f(AX1,M_880minus90_AX1,440))
+print(response_MA_f(AX2,M_880minus90_AX2,440))
+print(response_MA_f(AX3,M_880minus90_AX3,440))
+print(response_MA_f(AX1,M_880minus90_AX1,440*2))
+print(response_MA_f(AX2,M_880minus90_AX2,440*2))
+print(response_MA_f(AX3,M_880minus90_AX3,440*2))
+print(response_MA_f(AX1,M_880minus90_AX1,440*3))
+print(response_MA_f(AX2,M_880minus90_AX2,440*3))
+print(response_MA_f(AX3,M_880minus90_AX3,440*3))
+print(response_MA_f(AX1,M_880minus90_AX1,440*4))
+print(response_MA_f(AX2,M_880minus90_AX2,440*4))
+print(response_MA_f(AX3,M_880minus90_AX3,440*4))
+print(response_MA_f(AX1,M_880minus90_AX1,440*5))
+print(response_MA_f(AX2,M_880minus90_AX2,440*5))
+print(response_MA_f(AX3,M_880minus90_AX3,440*5))
+
+# En este caso se logra filtrar los armónicos mayores manteniendo un 70% de la frecuencia fundamental, por lo cual esulta apropiado como largo de la ventana para el filtro.
+
+
 inicio = time.time()
-xfr = mediamovildr(A,40)
+filtranding = mediaMovilD(A, 47)
+final = time.time()
+tiempo = final-inicio
+print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
+
+plt.figure(6)
+plt.plot(t[20:], filtranding[20:])
+plt.title('Señal filtrada con filtro MA, M=40')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Amplitud')
+plt.xlim(0, 8/f0)
+plt.ylim(-2,2)
+
+plt.tight_layout()
+plt.show()
+
+inicio = time.time()
+xfr = mediamovildr(A,47)
 final = time.time()
 tiempo = final-inicio
 print("El tiempo que tarda el filtro de implementación recursiva en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
@@ -770,8 +827,6 @@ plt.subplot(1,3,3)
 plt.plot(np.linspace(0,len(signal3),len(SROff3)), np.array(SROff3))
 plt.show()
 
-# Falta: Revisar error: Invalid value encountered in double_scalars (probablemente alguna división sobre cero)
-
 # %%
 
 #Ejercicio 11
@@ -1026,17 +1081,17 @@ plt.tight_layout()
 plt.show()
 
 def getLobeWidth(x, fs=44100):
-    for i in range(0,len(x)):
-        if x[i] < 0:
+    for i in range(1,len(x)):
+        if np.abs(x[i]) > np.abs(x[i-1]):
             return ((i*fs)//(len(x)))
 
 w_lobewidth = getLobeWidth(w_dft)
 hann_lobewidth = getLobeWidth(hann_dft)
 blackMan_lobewidth = getLobeWidth(blackMan_dft)
 
-print(w_lobewidth)
-print(hann_lobewidth)
-print(blackMan_lobewidth)
+print('Ancho del lóbulo principal para ventana rectangular:',w_lobewidth)
+print('Ancho del lóbulo principal para ventana de Hann:',hann_lobewidth)
+print('Ancho del lóbulo principal para ventana de Blackman:',blackMan_lobewidth)
 
 print("La DFT de la señal limpia del ejercicio 1 multiplicada por la ventana rectangular presenta cierto leaking, a diferencia de cuando es multiplicada por una ventana Hann o Blackman")
 print("Se puede ver el componente armonico de la señal original en las respectivas transformadas, pero en la señal ruidosa 1 y 3 multiplicadas con la ventana rectangular es menos legible")
@@ -1056,27 +1111,15 @@ f = np.arange(0, fs//2, (fs//2)/len(A_w_dft))
 
 def dBreduction_MA_f (x ,M, f, fs=44100, pref=0.00002):
     
-    # Transformada y normalización de x
-    x_fft = np.abs(rfft(x))
+    # Creo sinusoide de frecuencia buscada y aplico filtro MA de ancho M
+    sig = np.sin(2*np.arange(len(x))*np.pi*(f/fs))
 
-    x_fft = x_fft/np.amax(x_fft)
+    MA = mediamovildr(sig, M)
 
-    # Creación, Transformada y Normalización del filtro
-    MA = np.hstack([np.ones(M),np.zeros(len(x)-M)])
+    # Respuesta para la frecuencia buscada en dB
+    res = 20*np.log10(np.amax(MA)/np.amax(sig))
 
-    MA_fft = np.abs(rfft(MA))
-
-    MA_fft = MA_fft/np.amax(MA_fft)
-
-    # Magnitud de la reducción en Dbs
-    MA_mag = 20*np.log10(MA_fft/x_fft)
-
-    # Índice correspondiente a la frecuencia buscada
-    index_freq = (f*2*len(MA))//fs
-
-    dBreduction = MA_mag[index_freq]
-
-    return dBreduction 
+    return res
 
 # Se busca mediante iteración y comparación un número de muestras de la ventana que permita una reducción que no sobrepase los 3 dB, tomando el valor anterior a una reducción mayor a -3 dB (si este es negativo también).
 
@@ -1099,10 +1142,10 @@ print(M_minus3dB_AX1)
 print(M_minus3dB_AX2)
 print(M_minus3dB_AX3)
 
-# Genero el filtro de media móvil con la ventana obtenida para x1
-MA_3dB_880 = np.hstack([np.ones(M_minus3dB_AX1+1),np.zeros(len(AX1)-M_minus3dB_AX1-1)])
-MA_3dB_880_fft = np.abs(rfft(MA_3dB_880))
-MA_3dB_880_fft = MA_3dB_880_fft/np.amax(MA_3dB_880_fft)
+# Genero la respuesta del filtro de media móvil con la ventana obtenida para x1
+MA_3dB_880_res = (np.sin(np.pi*(np.arange(1,len(f))/(fs/2))*0.5*M_minus3dB_AX1))/(M_minus3dB_AX1*np.sin(np.pi*(np.arange(1,len(f))/(fs/2))*0.5))
+MA_3dB_880_res = np.append([1],MA_3dB_880_res)
+MA_3dB_880_res = np.abs(MA_3dB_880_res)/np.amax(MA_3dB_880_res)
 
 # Filtro las 3 señales con sus respectivos filtros MA y luego transformo y normalizo
 AX1_filt880 = mediamovildr(AX1, M_minus3dB_AX1)
@@ -1133,7 +1176,7 @@ plt.subplot(2,2,1)
 plt.title('Respuesta en frecuencia de filtro MA')
 plt.xlabel('Frecuencia')
 plt.ylabel('Amplitud')
-plt.plot(f,MA_3dB_880_fft)
+plt.plot(f,MA_3dB_880_res)
 plt.xlim(0,5000)
 
 f_AX = np.arange(0, fs//2, (fs//2)/len(AX1_filt880_fft))
@@ -1168,7 +1211,7 @@ plt.xlim(0,5000)
 plt.tight_layout()
 plt.show()
 
-print('La atenuación del filtro en 880 Hz es de', (20*np.log10((MA_3dB_880_fft[(880*2*len(MA_3dB_880_fft))//fs])/(1))), 'dB')
+print('La atenuación del filtro en 880 Hz es de', (20*np.log10((MA_3dB_880_res[(880*2*len(MA_3dB_880_res))//fs])/(1))), 'dB')
 
 SNR1 = Señal_Ruido(AX1,sigma1,fs/f0)
 SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
