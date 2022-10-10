@@ -305,7 +305,6 @@ print('Se observa que para mayor cantidad de señales, mayor será el SNR del pr
 
 #Ejercicio 5
 
-from scipy import fftpack
 import time
 
 # Definición de funciones
@@ -370,80 +369,57 @@ def M_for_response(x,f,response,fs=44100, pref=0.00002):
             break
     return M_for_R
 
-M_minus90_AX1 = M_for_response(AX1,[880, 1320, 1760, 2200], 0.1)
-M_minus90_AX2 = M_for_response(AX2,[880, 1320, 1760, 2200], 0.1)
-M_minus90_AX3 = M_for_response(AX3,[880, 1320, 1760, 2200], 0.1)
+# Como las señales tienen la misma longitud, basta con desarrollar sólo para una de ellas.
 
-print(M_minus90_AX1)
-print(M_minus90_AX2)
-print(M_minus90_AX3)
+M_minus90_AX1 = M_for_response(AX1,[880, 1320, 1760, 2200], 0.1)
+
+print("Largo de Ventana MA para atenuar 90%:", M_minus90_AX1)
 
 # Se chequea que se cumpla la atenuación para todos los armónicos
-print(response_MA_f(AX1,M_minus90_AX1,440))
-print(response_MA_f(AX2,M_minus90_AX2,440))
-print(response_MA_f(AX3,M_minus90_AX3,440))
-print(response_MA_f(AX1,M_minus90_AX1,440*2))
-print(response_MA_f(AX2,M_minus90_AX2,440*2))
-print(response_MA_f(AX3,M_minus90_AX3,440*2))
-print(response_MA_f(AX1,M_minus90_AX1,440*3))
-print(response_MA_f(AX2,M_minus90_AX2,440*3))
-print(response_MA_f(AX3,M_minus90_AX3,440*3))
-print(response_MA_f(AX1,M_minus90_AX1,440*4))
-print(response_MA_f(AX2,M_minus90_AX2,440*4))
-print(response_MA_f(AX3,M_minus90_AX3,440*4))
-print(response_MA_f(AX1,M_minus90_AX1,440*5))
-print(response_MA_f(AX2,M_minus90_AX2,440*5))
-print(response_MA_f(AX3,M_minus90_AX3,440*5))
+print('Atenuación por MA en 440 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440)))
+print('Atenuación por MA en 880 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440*2)))
+print('Atenuación por MA en 1320 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440*3)))
+print('Atenuación por MA en 1760 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440*4)))
+print('Atenuación por MA en 2200 Hz:',100*(1-response_MA_f(AX1,M_minus90_AX1,440*5)))
 
 # Son todos menores a 0.1, pero 440 Hz también se encuentra atenuado en casi un 90%, por lo cual no sería la condición buscada.
 
-# Se busca entonces sólo filtrar la frecuencia de 880 Hz en un 90%.
+# Se busca entonces filtrar las frecuencias mayores a 880 Hz en un 90% en promedio.
 
 def M_for_response_f(x,f,response,fs=44100, pref=0.00002):
-    for i in range(1,fs//2):   
-        res = response_MA_f(x,i,f)
-        if res < response:
+    for i in range(1,fs//2):
+        res = np.zeros(len(f))
+        for j in range(len(f)):    
+            res[j] = response_MA_f(x,i,f[j])
+        if np.average(res) < response:
             M_for_R = i
             break
     return M_for_R
 
-M_880minus90_AX1 = M_for_response_f(AX1,880, 0.1)
-M_880minus90_AX2 = M_for_response_f(AX2,880, 0.1)
-M_880minus90_AX3 = M_for_response_f(AX3,880, 0.1)
+M_880minus90_AX1 = M_for_response_f(AX1,[880, 1320, 1760, 2200], 0.1)
 
-print(M_880minus90_AX1)
-print(M_880minus90_AX2)
-print(M_880minus90_AX3)
+print("Largo de Ventana MA para atenuar 90% en promedio:", M_880minus90_AX1)
 
 # Se chequea que se cumpla la atenuación para todos los armónicos
-print(response_MA_f(AX1,M_880minus90_AX1,440))
-print(response_MA_f(AX2,M_880minus90_AX2,440))
-print(response_MA_f(AX3,M_880minus90_AX3,440))
-print(response_MA_f(AX1,M_880minus90_AX1,440*2))
-print(response_MA_f(AX2,M_880minus90_AX2,440*2))
-print(response_MA_f(AX3,M_880minus90_AX3,440*2))
-print(response_MA_f(AX1,M_880minus90_AX1,440*3))
-print(response_MA_f(AX2,M_880minus90_AX2,440*3))
-print(response_MA_f(AX3,M_880minus90_AX3,440*3))
-print(response_MA_f(AX1,M_880minus90_AX1,440*4))
-print(response_MA_f(AX2,M_880minus90_AX2,440*4))
-print(response_MA_f(AX3,M_880minus90_AX3,440*4))
-print(response_MA_f(AX1,M_880minus90_AX1,440*5))
-print(response_MA_f(AX2,M_880minus90_AX2,440*5))
-print(response_MA_f(AX3,M_880minus90_AX3,440*5))
+print('Atenuación por MA en 440 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440)),'%')
+print('Atenuación por MA en 880 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440*2)),'%')
+print('Atenuación por MA en 1320 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440*3)),'%')
+print('Atenuación por MA en 1760 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440*4)),'%')
+print('Atenuación por MA en 2200 Hz:',100*(1-response_MA_f(AX1,M_880minus90_AX1,440*5)),'%')
 
-# En este caso se logra filtrar los armónicos mayores manteniendo un 70% de la frecuencia fundamental, por lo cual esulta apropiado como largo de la ventana para el filtro.
+# En este caso se logra filtrar los armónicos mayores manteniendo un 65% de la frecuencia fundamental, por lo cual resulta apropiado como largo de la ventana para el filtro.
+# El valor de 49 muestras resulta lógico, ya que es cercano al número de muestras por cada período de la frecuencia de 880 Hz (44100/440 = 50 muestras aprox.), lo cual significa que cada ciclo de esa frecuencia está siendo prácticamente eliminado al promediarse. Los otros armónicos tienen períodos de 33, 25 y 20 muestras, lo cual implica que el de 25, al entrar 2 veces en 50, tendrá una atenuación similar al de 50 muestras, mientras que los otros dos no tendrán tanta atenuación, lo cual se observa en los resultados anteriores.
 
 
 inicio = time.time()
-filtranding = mediaMovilD(A, 47)
+filtranding = mediaMovilD(A, 49)
 final = time.time()
 tiempo = final-inicio
 print("El tiempo que tarda el filtro directo en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
 
 plt.figure(6)
 plt.plot(t[20:], filtranding[20:])
-plt.title('Señal filtrada con filtro MA, M=40')
+plt.title('Señal filtrada con filtro MA, M=49')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Amplitud')
 plt.xlim(0, 8/f0)
@@ -453,14 +429,14 @@ plt.tight_layout()
 plt.show()
 
 inicio = time.time()
-xfr = mediamovildr(A,47)
+xfr = mediamovildr(A,49)
 final = time.time()
 tiempo = final-inicio
 print("El tiempo que tarda el filtro de implementación recursiva en ejecutarse es de " +str(round(tiempo,2))+ " segundos")
 
 plt.figure(7)
 plt.plot(t[20:], xfr[20:])
-plt.title('Señal filtrada con filtro MA, M=40, Implementación recursiva')
+plt.title('Señal filtrada con filtro MA, M=49, Implementación recursiva')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Amplitud')
 plt.xlim(0, 8/f0)
