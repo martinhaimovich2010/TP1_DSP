@@ -602,24 +602,30 @@ plt.figure(13, figsize=(25,15))
 plt.subplot(2,2,1)
 plt.plot(t1, conv)
 plt.title("Convolucion lineal")
+plt.xlabel("Muestras")
+plt.ylabel("Amplitud")
 
 #Grafico convolucion circular
 plt.subplot(2,2,2)
 plt.plot(t2, conv_circ)
 plt.title("Convolucion circular")
+plt.xlabel("Muestras")
+plt.ylabel("Amplitud")
 
 #Grafico convolucion circular de misma longitud que la lineal
 plt.subplot(2,2,3)
 plt.plot(t3, circ_lin)
 plt.title("Conv circular (misma long que conv lineal)")
+plt.xlabel("Muestras")
+plt.ylabel("Amplitud")
 
 plt.tight_layout()
 plt.show()
 
 #Genero audios de las señales convolucionadas
 sf.write('Conv.wav',conv,fs)
-sf.write('Conv circular.wav',conv_circ,fs)
-sf.write('Circular (igual lineal).wav',circ_lin,fs)
+sf.write('Conv_circular.wav',conv_circ,fs)
+sf.write('Circular_igual_lineal.wav',circ_lin,fs)
 
 print("La señal convolucionada linealmente y la convolucionada circular con las mismas muestras que la lineal dan graficos identicos por lo que el calculo es coherente")
 print("Ademas se escucha en los archivos de audio a la misma señal del ejercicio 1 con una pequeña reverb producto de ser convolucionada con la respuesta al impulso de un recinto")
@@ -970,9 +976,10 @@ plt.plot(f, abs(AX3_b_dft))
 plt.title("DFT señal ruidosa 3 con Blackman")
 plt.xlabel("Frecuencia [Hz]")
 plt.ylabel("Amplitud")
+plt.tight_layout()
+plt.show()
 
 #Convierto la magnitud de las transformadas en dB
-pref = 0.00002
 #Ventana rectangular
 A_w_dft_db = 20*np.log10(A_w_dft)
 AX1_w_dft_db = 20*np.log10(AX1_w_dft)
@@ -1059,8 +1066,9 @@ plt.plot(f, abs(AX3_b_dft_db))
 plt.title("DFT señal ruidosa 3 con Blackman")
 plt.xlabel("Frecuencia [Hz]")
 plt.ylabel("dB")
-
+plt.tight_layout()
 plt.show()
+
 
 # Transformadas de las ventanas en decibeles
 w_dft = rfft(w)
