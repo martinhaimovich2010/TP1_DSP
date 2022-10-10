@@ -574,7 +574,7 @@ plt.plot(th, h)
 from conv_circular import circular_convolve, _periodic_summation
 
 #Convolucion lineal
-conv = sig.convolve(A, h, mode='full')
+conv = sig.fftconvolve(A, h, mode='full')
 conv = conv / np.amax(conv)
 
 #Convolucion circular
@@ -601,7 +601,7 @@ t2 = np.linspace(0,2,len(conv_circ))
 t3 = np.linspace(0,2,len(circ_lin))
 
 #Grafico convolucion lineal
-plt.figure(13, figsize=(25,15))
+plt.figure(13, figsize=(15,7))
 plt.subplot(2,2,1)
 plt.plot(t1, conv)
 plt.title("Convolucion lineal")
@@ -699,12 +699,18 @@ STE1 = shortTimeEnergy(1000, signal1, 500)
 STE2 = shortTimeEnergy(1000, signal2, 500)
 STE3 = shortTimeEnergy(1000, signal3, 500)
 
-plt.figure(figsize=(25,15))
+plt.figure(14, figsize=(20,10))
 plt.subplot(1,3,1)
+plt.title('STE Signal 1')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal1),len(STE1)), np.array(STE1))
 plt.subplot(1,3,2)
+plt.title('STE Signal 2')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal2),len(STE2)), np.array(STE2))
 plt.subplot(1,3,3)
+plt.title('STE Signal 3')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(STE3)), np.array(STE3))
 plt.show()
 
@@ -712,12 +718,18 @@ ZCR1 = zeroCrossingRate(1000, signal1, 500)
 ZCR2 = zeroCrossingRate(1000, signal2, 500)
 ZCR3 = zeroCrossingRate(1000, signal3, 500)
 
-plt.figure(figsize=(25,15))
+plt.figure(15, figsize=(20,10))
 plt.subplot(1,3,1)
+plt.title('ZCR Signal 1')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal1),len(ZCR1)), np.array(ZCR1))
 plt.subplot(1,3,2)
+plt.title('ZCR Signal 2')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal2),len(ZCR2)), np.array(ZCR2))
 plt.subplot(1,3,3)
+plt.title('ZCR Signal 3')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(ZCR3)), np.array(ZCR3))
 plt.show()
 
@@ -725,13 +737,18 @@ ENEN1 = energyEntropy(1000, signal1, 200, 500)
 ENEN2 = energyEntropy(1000, signal2, 200, 500)
 ENEN3 = energyEntropy(1000, signal3, 200, 500)
 
-plt.figure(figsize=(25,15))
-plt.title('Entropía de Energía')
+plt.figure(16, figsize=(20,10))
 plt.subplot(1,3,1)
+plt.title('Energy Entropy Signal 1')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal1),len(ENEN1)), np.array(ENEN1))
 plt.subplot(1,3,2)
+plt.title('Energy Entropy Signal 2')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal2),len(ENEN2)), np.array(ENEN2))
 plt.subplot(1,3,3)
+plt.title('Energy Entropy Signal 3')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(ENEN3)), np.array(ENEN3))
 plt.show()
 
@@ -803,12 +820,18 @@ SC1 = spectralCentroid(1000, signal1, 500)
 SC2 = spectralCentroid(1000, signal2, 500)
 SC3 = spectralCentroid(1000, signal3, 500)
 
-plt.figure(figsize=(25,15))
+plt.figure(17,figsize=(20,10))
 plt.subplot(1,3,1)
+plt.title('Spectral Centroid Signal 1')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal1),len(SC1)), np.array(SC1))
 plt.subplot(1,3,2)
+plt.title('Spectral Centroid Signal 2')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal2),len(SC2)), np.array(SC2))
 plt.subplot(1,3,3)
+plt.title('Spectral Centroid Signal 3')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(SC3)), np.array(SC3))
 plt.show()
 
@@ -816,12 +839,18 @@ SF1 = spectralFlux(1000, signal1, 500)
 SF2 = spectralFlux(1000, signal2, 500)
 SF3 = spectralFlux(1000, signal3, 500)
 
-plt.figure(figsize=(25,15))
+plt.figure(18,figsize=(20,10))
 plt.subplot(1,3,1)
+plt.title('Spectral Flux Signal 1')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal1),len(SF1)), np.array(SF1))
 plt.subplot(1,3,2)
+plt.title('Spectral Flux Signal 2')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal2),len(SF2)), np.array(SF2))
 plt.subplot(1,3,3)
+plt.title('Spectral Flux Signal 3')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(SF3)), np.array(SF3))
 plt.show()
 
@@ -829,12 +858,18 @@ SROff1 = spectralRolloff(1000, signal1, 500, 0.9)
 SROff2 = spectralRolloff(1000, signal2, 500, 0.9)
 SROff3 = spectralRolloff(1000, signal3, 500, 0.9)
 
-plt.figure(figsize=(25,15))
+plt.figure(19,figsize=(20,10))
 plt.subplot(1,3,1)
+plt.title('Spectral Rolloff Signal 1')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal1),len(SROff1)), np.array(SROff1))
 plt.subplot(1,3,2)
+plt.title('Spectral Rolloff Signal 2')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal2),len(SROff2)), np.array(SROff2))
 plt.subplot(1,3,3)
+plt.title('Spectral Rolloff Signal 3')
+plt.xlabel('Frames')
 plt.plot(np.linspace(0,len(signal3),len(SROff3)), np.array(SROff3))
 plt.show()
 
@@ -901,10 +936,11 @@ AX3_b_dft = np.abs(rfft(AX3_b))
 # AX3_b_dft = AX3_b_dft / np.amax(AX3_b_dft)
 
 #Creo vector de frecuencias para graficar las DFTs
-f = np.arange(0, fs//2, (fs//2)/len(A_w_dft)) #Podria haber dividido a la mitad de fs por la longitud de cualquiera de las transformadas
+f = np.arange(0, fs//2, (fs//2)/len(A_w_dft)) 
+#Podria haber dividido a la mitad de fs por la longitud de cualquiera de las transformadas
 
 #Grafico todo
-plt.figure(figsize=(35,25))
+plt.figure(20,figsize=(35,25))
 #Grafico las transformadas de la señal limpia
 plt.subplot(4,3,1)
 plt.plot(f, abs(A_w_dft))
@@ -973,6 +1009,9 @@ plt.title("DFT señal ruidosa 3 con Blackman")
 plt.xlabel("Frecuencia [Hz]")
 plt.ylabel("Amplitud")
 
+plt.tight_layout()
+plt.show()
+
 #Convierto la magnitud de las transformadas en dB
 pref = 0.00002
 #Ventana rectangular
@@ -992,8 +1031,7 @@ AX2_b_dft_db = 20*np.log10(AX2_b_dft)
 AX3_b_dft_db = 20*np.log10(AX3_b_dft)
 
 #Grafico las transformadas en escala logaritmica
-
-plt.figure(figsize=(36,26))
+plt.figure(21,figsize=(36,26))
 #Grafico las transformadas de la señal limpia
 plt.subplot(4,3,1)
 plt.plot(f, abs(A_w_dft_db))
@@ -1062,6 +1100,7 @@ plt.title("DFT señal ruidosa 3 con Blackman")
 plt.xlabel("Frecuencia [Hz]")
 plt.ylabel("dB")
 
+plt.tight_layout()
 plt.show()
 
 # Transformadas de las ventanas en decibeles
@@ -1077,7 +1116,7 @@ hann_dft_dB = 20*np.log10(np.abs(hann_dft))
 blackMan_dft_dB = 20*np.log10(np.abs(blackMan_dft))
 
 # Grafico las transformadas
-plt.figure(figsize=(15,7))
+plt.figure(22,figsize=(15,7))
 plt.plot(f,w_dft_dB, label='Rectangular')
 plt.plot(f,hann_dft_dB, label='Hann')
 plt.plot(f,blackMan_dft_dB, label='Blackman')
@@ -1086,7 +1125,6 @@ plt.xlabel('Frecuencia')
 plt.ylabel('Amplitud [dB]')
 plt.xlim(0,250)
 plt.legend(loc='upper right', shadow=True)
-# plt.ylim(-50,0)
 
 plt.tight_layout()
 plt.show()
@@ -1108,8 +1146,6 @@ print("La DFT de la señal limpia del ejercicio 1 multiplicada por la ventana re
 print("Se puede ver el componente armonico de la señal original en las respectivas transformadas, pero en la señal ruidosa 1 y 3 multiplicadas con la ventana rectangular es menos legible")
 print("Multiplicando las señales originales con las ventanas de Hann y Blackman se pueden ver de forma mas notoria los armonicos de la señal del ejercicio 1")
 print("A medida que la desviacion estandar de la señal aumenta el ruido es mayor. Esto se puede ver comparando los graficos de las tres señales con ruido")
-
-# Ver Atenuación de SNR y ancho de lóbulo principal
 
 # %%
 
@@ -1154,7 +1190,8 @@ print(M_minus3dB_AX2)
 print(M_minus3dB_AX3)
 
 # Genero la respuesta del filtro de media móvil con la ventana obtenida para x1
-MA_3dB_880_res = (np.sin(np.pi*(np.arange(1,len(f))/(fs/2))*0.5*M_minus3dB_AX1))/(M_minus3dB_AX1*np.sin(np.pi*(np.arange(1,len(f))/(fs/2))*0.5))
+
+MA_3dB_880_res = (np.sin( np.pi * (np.arange(1,len(f))/(fs/2)) * 0.5 * M_minus3dB_AX1)) / ( M_minus3dB_AX1 * np.sin( np.pi * (np.arange(1,len(f))/(fs/2)) * 0.5))
 MA_3dB_880_res = np.append([1],MA_3dB_880_res)
 MA_3dB_880_res = np.abs(MA_3dB_880_res)/np.amax(MA_3dB_880_res)
 
@@ -1222,7 +1259,7 @@ plt.xlim(0,5000)
 plt.tight_layout()
 plt.show()
 
-print('La atenuación del filtro en 880 Hz es de', (20*np.log10((MA_3dB_880_res[(880*2*len(MA_3dB_880_res))//fs])/(1))), 'dB')
+print('La atenuación del filtro en 880 Hz es de', dBreduction_MA_f(AX1,M_minus3dB_AX1,880), 'dB')
 
 SNR1 = Señal_Ruido(AX1,sigma1,fs/f0)
 SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
