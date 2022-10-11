@@ -546,11 +546,20 @@ convBlackEnd = ( (len(convBlack)+len(t)) // 2 )
 
 #Grafico
 plt.figure(12, figsize=(15,7))
+plt.subplot(211)
 plt.plot(t, convBlack[0:len(t)])
 plt.xlim(0.0031, 8/f0)
 plt.title('Señal filtrada con ventana de Blackman (M=50)')
 plt.xlabel("Tiempo")
-plt.ylabel("Amplitud")
+plt.ylabel("Amplitud Normalizada")
+
+plt.subplot(212)
+plt.plot(t, filtranding)
+plt.xlim(0.0031, 8/f0)
+plt.title('Señal filtrada con filtro Media Móvil (M=50)')
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
+
 plt.tight_layout()
 plt.show()
 
@@ -594,22 +603,22 @@ plt.figure(13, figsize=(15,7))
 plt.subplot(2,2,1)
 plt.plot(t1, conv)
 plt.title("Convolucion lineal")
-plt.xlabel("Muestras")
-plt.ylabel("Amplitud")
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
 
 #Grafico convolucion circular
 plt.subplot(2,2,2)
 plt.plot(t2, conv_circ)
 plt.title("Convolucion circular")
-plt.xlabel("Muestras")
-plt.ylabel("Amplitud")
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
 
 #Grafico convolucion circular de misma longitud que la lineal
 plt.subplot(2,2,3)
 plt.plot(t3, circ_lin)
 plt.title("Conv circular (misma long que conv lineal)")
-plt.xlabel("Muestras")
-plt.ylabel("Amplitud")
+plt.xlabel("Tiempo")
+plt.ylabel("Amplitud Normalizada")
 
 plt.tight_layout()
 plt.show()
@@ -886,10 +895,10 @@ plt.show()
 #Ejercicio 11
 
 #Genero las ventanas
-M = 1000
-w = 1/M * np.append(np.ones(M), np.zeros(len(t)-M))
-hann = np.append((0.5 - 0.5 * np.cos((2*np.pi*np.arange(M))/M))/(M) , np.zeros(len(t)-M))
-blackMan = np.append( (0.42 - 0.5 * np.cos((2*np.pi*np.arange(M))/(M-1)) + 0.08 * np.cos((4*np.pi*np.arange(M))/(M-1))) , np.zeros(len(t)-M) )
+M = len(A)
+w = np.ones(M)
+hann = (0.5 - 0.5 * np.cos((2*np.pi*np.arange(M))/M))
+blackMan = 0.42 - 0.5 * np.cos((2*np.pi*np.arange(M))/(M-1)) + 0.08 * np.cos((4*np.pi*np.arange(M))/(M-1))
 
 #Multiplico las señales por la ventana rectangular
 A_w = A * w
@@ -1095,11 +1104,17 @@ plt.ylabel("dB")
 plt.tight_layout()
 plt.show()
 
+# Genero ventanas con M=50
+M_2 = 50
+w_50 = 1/M_2 * np.append(np.ones(M_2), np.zeros(len(t)-M_2))
+hann_50 = np.append((0.5 - 0.5 * np.cos((2*np.pi*np.arange(M_2))/M_2))/(M_2) , np.zeros(len(t)-M_2))
+blackMan_50 = np.append( (0.42 - 0.5 * np.cos((2*np.pi*np.arange(M_2))/(M_2-1)) + 0.08 * np.cos((4*np.pi*np.arange(M_2))/(M_2-1))) , np.zeros(len(t)-M_2) )
+
 
 # Transformadas de las ventanas en decibeles
-w_dft = rfft(w)
-hann_dft = rfft(hann)
-blackMan_dft = rfft(blackMan)
+w_dft = rfft(w_50)
+hann_dft = rfft(hann_50)
+blackMan_dft = rfft(blackMan_50)
 
 w_dft = w_dft / np.amax(w_dft)
 hann_dft = hann_dft / np.amax(hann_dft)
@@ -1108,20 +1123,6 @@ blackMan_dft = blackMan_dft / np.amax(blackMan_dft)
 w_dft_dB = 20*np.log10(np.abs(w_dft))
 hann_dft_dB = 20*np.log10(np.abs(hann_dft))
 blackMan_dft_dB = 20*np.log10(np.abs(blackMan_dft))
-
-# Grafico las transformadas
-plt.figure(22,figsize=(15,7))
-plt.plot(f,w_dft_dB, label='Rectangular')
-plt.plot(f,hann_dft_dB, label='Hann')
-plt.plot(f,blackMan_dft_dB, label='Blackman')
-plt.title('Respuesta en frecuencia Ventanas')
-plt.xlabel('Frecuencia')
-plt.ylabel('Amplitud [dB]')
-plt.xlim(0,250)
-plt.legend(loc='upper right', shadow=True)
-
-plt.tight_layout()
-plt.show()
 
 # Defino función para obtener ancho del lóbulo principal y lo calculo para cada ventana.
 
@@ -1138,10 +1139,25 @@ print('Ancho del lóbulo principal para ventana rectangular:',w_lobewidth)
 print('Ancho del lóbulo principal para ventana de Hann:',hann_lobewidth)
 print('Ancho del lóbulo principal para ventana de Blackman:',blackMan_lobewidth)
 
+# Grafico las transformadas
+plt.figure(22,figsize=(15,7))
+plt.plot(f,w_dft_dB, label='Rectangular')
+plt.plot(f,hann_dft_dB, label='Hann')
+plt.plot(f,blackMan_dft_dB, label='Blackman')
+plt.title('Respuesta en frecuencia Ventanas')
+plt.xlabel('Frecuencia')
+plt.ylabel('Amplitud [dB]')
+plt.xlim(0,np.amax([w_lobewidth,hann_lobewidth,blackMan_lobewidth]))
+plt.legend(loc='upper right', shadow=True)
+
+plt.tight_layout()
+plt.show()
+
 print("La DFT de la señal limpia del ejercicio 1 multiplicada por la ventana rectangular presenta cierto leaking, a diferencia de cuando es multiplicada por una ventana Hann o Blackman")
 print("Se puede ver el componente armonico de la señal original en las respectivas transformadas, pero en la señal ruidosa 1 y 3 multiplicadas con la ventana rectangular es menos legible")
 print("Multiplicando las señales originales con las ventanas de Hann y Blackman se pueden ver de forma mas notoria los armonicos de la señal del ejercicio 1")
 print("A medida que la desviacion estandar de la señal aumenta el ruido es mayor. Esto se puede ver comparando los graficos de las tres señales con ruido")
+print('En el último gráfico se observan las diferencias entre los lóbulos principales y las atenuaciones de cada ventana. La ventana de Blackman presenta un lóbulo principal 3 veces más amplio que el de la rectangular y los siguientes lóbulos se ven mucho más atenuados en comparación. En el caso de la ventana de Hann, el ancho es del doble del de la rectangular y también hay una mayor atenuación de los siguientes lóbulos en relación a la rectangular, aunque no tanto como la de Blackman. En el caso de la ventana rectangular, la atenuación de los lóbulos superiores es relativamente leve con respecto a la del lóbulo principal.')
 
 # %%
 
@@ -1212,10 +1228,8 @@ AX1_fft = AX1_fft / np.amax(AX1_fft)
 AX2_fft = AX2_fft / np.amax(AX2_fft)
 AX3_fft = AX3_fft / np.amax(AX3_fft)
 
-(880*2*len(AX1_filt880))//fs
-
-plt.figure(22,figsize=(15,7))
-plt.subplot(2,2,1)
+plt.figure(23,figsize=(15,15))
+plt.subplot(3,2,1)
 plt.title('Respuesta en frecuencia de filtro MA')
 plt.xlabel('Frecuencia')
 plt.ylabel('Amplitud')
@@ -1224,7 +1238,7 @@ plt.xlim(0,5000)
 
 f_AX = np.arange(0, fs//2, (fs//2)/len(AX1_filt880_fft))
 
-plt.subplot(2,2,2)
+plt.subplot(3,2,2)
 plt.title('Señal x1 filtrada')
 plt.xlabel('Frecuencia')
 plt.ylabel('Amplitud')
@@ -1233,7 +1247,7 @@ plt.plot(f_AX,AX1_filt880_fft, label='Filtrada')
 plt.legend(loc='upper right', shadow=True)
 plt.xlim(0,5000)
 
-plt.subplot(2,2,3)
+plt.subplot(3,2,3)
 plt.title('Señal x2 filtrada')
 plt.xlabel('Frecuencia')
 plt.ylabel('Amplitud')
@@ -1242,7 +1256,7 @@ plt.plot(f_AX,AX2_filt880_fft, label='Filtrada')
 plt.legend(loc='upper right', shadow=True)
 plt.xlim(0,5000)
 
-plt.subplot(2,2,4)
+plt.subplot(3,2,4)
 plt.title('Señal x3 filtrada')
 plt.xlabel('Frecuencia')
 plt.ylabel('Amplitud')
@@ -1251,10 +1265,30 @@ plt.plot(f_AX,AX3_filt880_fft, label='Filtrada')
 plt.legend(loc='upper right', shadow=True)
 plt.xlim(0,5000)
 
+plt.subplot(3,2,5)
+plt.title('Señal x1 filtrada, Atenuación en 880 Hz (Zoom)')
+plt.xlabel('Frecuencia')
+plt.ylabel('Amplitud [dB]')
+plt.plot(f_AX,20*np.log10(AX1_fft), label='Original')
+plt.plot(f_AX,20*np.log10(AX1_filt880_fft), label='Filtrada')
+plt.legend(loc='upper right', shadow=True)
+plt.xlim(800,1000)
+plt.ylim(-10,0)
+
+plt.subplot(3,2,6)
+plt.title('Señal x2 filtrada, Atenuación en 880 Hz (Zoom)')
+plt.xlabel('Frecuencia')
+plt.ylabel('Amplitud [dB]')
+plt.plot(f_AX,20*np.log10(AX2_fft), label='Original')
+plt.plot(f_AX,20*np.log10(AX2_filt880_fft), label='Filtrada')
+plt.legend(loc='upper right', shadow=True)
+plt.xlim(800,1000)
+plt.ylim(-10,0)
+
 plt.tight_layout()
 plt.show()
 
-print('La atenuación del filtro en 880 Hz es de', dBreduction_MA_f(AX1,M_minus3dB_AX1,880), 'dB')
+print('La atenuación del filtro en 880 Hz es de', np.round(dBreduction_MA_f(AX1,M_minus3dB_AX1,880),1), 'dB')
 
 SNR1 = Señal_Ruido(AX1,sigma1,fs/f0)
 SNR2 = Señal_Ruido(AX2,sigma2,fs/f0)
@@ -1271,11 +1305,11 @@ FILT880_SNR_layout = go.Layout(
     )
 )
 
-fig = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Sigma', 'SNR original', 'SNR filtrado'],align='center'),
+fig24 = go.Figure(data=[go.Table(header=dict(values=['Señal con ruido', 'Sigma', 'SNR original', 'SNR filtrado'],align='center'),
                 cells=dict(values=[["Señal 1", "Señal 2", "Señal 3"], [sigma1, sigma2, sigma3] , [SNR1, SNR2, SNR3], [SNR1_filt880, SNR2_filt880, SNR3_filt880]],align='center'))
                 ],
                 layout=FILT880_SNR_layout)
-fig.show()
+fig24.show()
 
 print('Se observa que el filtrado del ruido tiene mayor eficacia para el ruido de sigma=3 (Reducción del 79%), mientras que el peor caso es el de Sigma=0.1 (reducción del 40,8%)')
 
@@ -1286,18 +1320,18 @@ print('Se observa que el filtrado del ruido tiene mayor eficacia para el ruido d
 f1, t1, Zxx1 = sig.stft(A, fs, window='hann', nperseg=4000)
 Zxx1_mag = 20 * np.log10(np.abs(Zxx1))
 Zxx1_phase = np.angle(Zxx1)
-#Grafico magnitud en dB
-plt.figure(1, figsize=(17,9))
+# Grafico magnitud en dB
+plt.figure(25, figsize=(17,9))
 plt.subplot(231)
 plt.pcolormesh(t1, f1, Zxx1_mag)
-plt.title("Magnitud con ventana Hann")
+plt.title("Magnitud con ventana Hann - (M=4000)")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 plt.ylim(0,2500)
-#Grafico fase
+# Grafico fase
 plt.subplot(234)
 plt.pcolormesh(t1, f1, Zxx1_phase)
-plt.title("Fase con ventana Hann")
+plt.title("Fase con ventana Hann - (M=4000)")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
@@ -1305,34 +1339,34 @@ plt.ylabel("Frecuencia")
 f2, t2, Zxx2 = sig.stft(A, fs, window='blackman', nperseg=10000)
 Zxx2_mag = 20 * np.log10(np.abs(Zxx2))
 Zxx2_phase = np.angle(Zxx2)
-#Grafico magnitud en dB
+# Grafico magnitud en dB
 plt.subplot(232)
 plt.pcolormesh(t2, f2, Zxx2_mag)
-plt.title("Magnitud con ventana Blackman")
+plt.title("Magnitud con ventana Blackman - (M=10000)")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 plt.ylim(0,2500)
-#Grafico fase
+# Grafico fase
 plt.subplot(235)
 plt.pcolormesh(t2, f2, Zxx2_phase)
-plt.title("Fase con ventana Blackman")
+plt.title("Fase con ventana Blackman - (M=10000)")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
 f3, t3, Zxx3 = sig.stft(A, fs, window='boxcar', nperseg=10000)
 Zxx3_mag = 20 * np.log10(np.abs(Zxx3))
 Zxx3_phase = np.angle(Zxx3)
-#Grafico magnitud en dB
+# Grafico magnitud en dB
 plt.subplot(233)
 plt.pcolormesh(t3, f3, Zxx3_mag)
-plt.title("Magnitud con ventana rectangular")
+plt.title("Magnitud con ventana rectangular - (M=10000)")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 plt.ylim(0,2500)
-#Grafico fase
+# Grafico fase
 plt.subplot(236)
 plt.pcolormesh(t3, f3, Zxx3_phase)
-plt.title("Fase con ventana rectangular")
+plt.title("Fase con ventana rectangular - (M=10000)")
 plt.xlabel("Tiempo")
 plt.ylabel("Frecuencia")
 
