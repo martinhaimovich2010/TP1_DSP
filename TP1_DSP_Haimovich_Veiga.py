@@ -5,6 +5,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.signal as sig
+import random
+import plotly.graph_objects as go
+import time
+import soundfile as sf
+import sounddevice as sd
+from conv_circular import circular_convolve, _periodic_summation
+from scipy.fft import fft, rfft
+
 
 # Defino los parametros de frecuencia, frecuencia de muestreo, numero de armonicos, etc
 f0 = 440
@@ -58,8 +66,7 @@ print("Se puede ver que la señal resultante es una diente de sierra")
 
 #Ejercicio 2
 
-import random
-import plotly.graph_objects as go
+
 
 # Defino los parámetros
 mu = 0
@@ -305,7 +312,7 @@ print('Se observa que para mayor cantidad de señales, mayor será el SNR del pr
 
 #Ejercicio 5
 
-import time
+
 
 # Definición de funciones
 # Directa
@@ -570,14 +577,13 @@ print("Se puede apreciar que el filtraje con la ventana Blackman es mucho mejor 
 #Ejercicio 8
 
 #Importo libreria soundfile
-import soundfile as sf
-import sounddevice as sd
+
 
 #Importo archivo de audio y lo guardo en variable respuesta al impulso h
 h, fs = sf.read('Resp_Imp.wav')
 
 #Defino funciones a utilizar
-from conv_circular import circular_convolve, _periodic_summation
+
 
 #Convolucion lineal
 conv = sig.fftconvolve(A, h, mode='full')
@@ -918,7 +924,7 @@ AX1_b = AX1 * blackMan
 AX2_b = AX2 * blackMan
 AX3_b = AX3 * blackMan
 
-from scipy.fft import fft, rfft
+
 #Hago la DFT de las señales multiplicadas por la ventana rectangular
 A_w_dft = np.abs(rfft(A_w))
 AX1_w_dft = np.abs(rfft(AX1_w))
